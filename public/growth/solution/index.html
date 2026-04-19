@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>mozule growth — 4%の指示で、64点の実装を今日終わらせる</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            base: '#0A0A0A',
+            surface: '#111111',
+            border: '#1E1E1E',
+            accent: '#0070F3',
+            glow: '#0070F3',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: #0A0A0A; color: #E5E5E5; font-family: 'Inter', sans-serif; }
+
+    /* Fade-in on scroll */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Glow effects */
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,112,243,0.12) 0%, transparent 70%);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .cta-glow {
+      position: absolute;
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(0,112,243,0.08) 0%, transparent 70%);
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    /* CTA button */
+    .btn-primary {
+      background: #0070F3;
+      color: #fff;
+      font-weight: 600;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      background: #0060D0;
+      box-shadow: 0 0 32px rgba(0,112,243,0.35);
+      transform: translateY(-1px);
+    }
+
+    /* Card hover */
+    .pain-card {
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .pain-card:hover {
+      border-color: #0070F3;
+      box-shadow: 0 0 24px rgba(0,112,243,0.08);
+    }
+
+    /* Step line connector */
+    .step-line {
+      position: absolute;
+      left: 23px;
+      top: 48px;
+      bottom: -24px;
+      width: 1px;
+      background: linear-gradient(to bottom, #0070F3 0%, #1E1E1E 100%);
+    }
+
+    /* Number highlight */
+    .big-number {
+      background: linear-gradient(135deg, #0070F3, #00B4FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- ===== HERO ===== -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden px-6">
+    <div class="hero-glow"></div>
+    <div class="max-w-4xl mx-auto text-center relative z-10 fade-up">
+      <p class="text-sm tracking-widest uppercase text-gray-500 mb-6 font-medium">mozule growth</p>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight text-white mb-8">
+        <span class="big-number">「4%」</span>の指示で、<br class="hidden sm:block">
+        <span class="big-number">「64点」</span>の実装を<br class="hidden sm:block">今日終わらせる。
+      </h1>
+      <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-4">
+        完璧主義を破壊する、AIグロースエージェント。
+      </p>
+      <p class="text-base text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10">
+        リソースのないシード期に、100点の施策に1ヶ月をかける余裕はありますか？<br>
+        必要なのは、泥臭い手作業からの解放と、圧倒的な検証回数です。<br>
+        mozule growthは、分析（Signal）から本番コードへのデプロイ（Ship）までを自律実行。<br>
+        CxOであるあなたは、AIの提案に「Approve」を出すだけ。<br>
+        残りの96%の時間を、コアビジネスの創造に使ってください。
+      </p>
+      <a href="#demo" class="btn-primary">4%の労力でグロースループを回す（デモを予約）</a>
+    </div>
+    <!-- Subtle bottom border -->
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+  </section>
+
+  <!-- ===== PROBLEM ===== -->
+  <section class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-5xl mx-auto">
+      <div class="fade-up mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center leading-tight mb-6">
+          CxOが手を動かす組織は、<br>スケールしない。
+        </h2>
+        <p class="text-base md:text-lg text-gray-400 max-w-3xl mx-auto text-center leading-relaxed">
+          創業からシード期。優秀なグロース人材はゼロ。<br>
+          だからといって、いつまであなたが深夜にLPの文言を直し、SEOのキーワードを調べ、タグを埋め続けますか？<br><br>
+          「俺がやれば早い」<br>
+          その思考こそが、会社の成長を止める最大のボトルネックです。<br>
+          あなたが空くまで、何も実装されない。何も検証されない。<br><br>
+          綺麗なコードや完璧なデザインはいりません。<br>
+          今必要なのは<span class="text-white font-semibold">「売れるかどうか」のファクト</span>です。
+        </p>
+      </div>
+
+      <div class="fade-up mb-8">
+        <h3 class="text-xl md:text-2xl font-bold text-white text-center mb-12">
+          スタートアップを殺す「3つの深いペイン」
+        </h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up">
+        <!-- Card 1 -->
+        <div class="pain-card border border-border rounded-xl p-8 bg-[#0F0F0F]">
+          <div class="w-10 h-10 rounded-lg bg-[#0070F3]/10 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-white mb-3">CxOの「手動」ボトルネック</h4>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            戦略を描くべき経営陣が、泥臭い実装作業に追われ、本来の仕事が止まっている。
+          </p>
+        </div>
+        <!-- Card 2 -->
+        <div class="pain-card border border-border rounded-xl p-8 bg-[#0F0F0F]">
+          <div class="w-10 h-10 rounded-lg bg-[#0070F3]/10 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-white mb-3">「完璧主義」による足踏み</h4>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            優秀なメンバーほど100点を求めてリリースが遅れる。スタートアップ最大の敵「検証回数（打席数）の不足」に陥っている。
+          </p>
+        </div>
+        <!-- Card 3 -->
+        <div class="pain-card border border-border rounded-xl p-8 bg-[#0F0F0F]">
+          <div class="w-10 h-10 rounded-lg bg-[#0070F3]/10 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-white mb-3">「やりっぱなし」のグロース負債</h4>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            気合でLPを出したものの、その後の数値計測や改善にまで手が回らず、放置されている。
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+  </section>
+
+  <!-- ===== CONCEPT: 4/64 Growth Engine ===== -->
+  <section class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-5xl mx-auto">
+      <div class="fade-up text-center mb-16">
+        <p class="text-sm tracking-widest uppercase text-accent mb-4 font-medium">The Solution</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
+          The "4/64" Growth Engine
+        </h2>
+        <p class="text-gray-400 text-base md:text-lg max-w-2xl mx-auto">
+          4%の労力で、64%の成果（検証可能な実装）を最速でデプロイする
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 fade-up">
+        <!-- 4% Block -->
+        <div class="border border-border rounded-2xl p-8 md:p-10 bg-[#0F0F0F] relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#0070F3]/5 to-transparent pointer-events-none"></div>
+          <p class="big-number text-7xl md:text-8xl lg:text-9xl font-black mb-4">4%</p>
+          <p class="text-xs tracking-widest uppercase text-gray-500 mb-5 font-medium">CxOが払うべき「究極の引き算」された労力</p>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            AIがデータから立案・生成した「施策案とコード（PR）」をダッシュボードで確認し、「Approve（承認）」ボタンを押すだけ。残りの96%の時間を、資金調達や採用に全振りできます。
+          </p>
+        </div>
+        <!-- 64% Block -->
+        <div class="border border-border rounded-2xl p-8 md:p-10 bg-[#0F0F0F] relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#0070F3]/5 to-transparent pointer-events-none"></div>
+          <p class="big-number text-7xl md:text-8xl lg:text-9xl font-black mb-4">64%</p>
+          <p class="text-xs tracking-widest uppercase text-gray-500 mb-5 font-medium">スタートアップにとっての「最速の正解」</p>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            ユーザーの反応をテストするには十分なクオリティの実装。100点の施策に1ヶ月かけるより、64点の施策を「今日」デプロイし、明日のデータで改善する。これがランウェイの短いスタートアップの戦術です。
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-3xl mx-auto">
+      <div class="fade-up text-center mb-16">
+        <p class="text-sm tracking-widest uppercase text-accent mb-4 font-medium">How it works</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+          4つのループで、<br>実装を無人化する
+        </h2>
+      </div>
+
+      <div class="space-y-12 md:space-y-16">
+        <!-- Step 1: Signal -->
+        <div class="fade-up relative pl-16">
+          <div class="absolute left-0 top-0 w-12 h-12 rounded-full border border-accent/40 bg-accent/10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <div class="step-line"></div>
+          <p class="text-xs tracking-widest uppercase text-accent mb-2 font-medium">Step 01</p>
+          <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Signal — 検知の自動化</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            GA4やSearch Consoleを人間が睨みつける時間をゼロに。AIが「テコ入れすべきポイント」を自動抽出。
+          </p>
+        </div>
+
+        <!-- Step 2: Decide -->
+        <div class="fade-up relative pl-16">
+          <div class="absolute left-0 top-0 w-12 h-12 rounded-full border border-accent/40 bg-accent/10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="step-line"></div>
+          <p class="text-xs tracking-widest uppercase text-accent mb-2 font-medium">Step 02</p>
+          <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Decide — 思考の4%化</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            CxOはゼロから企画を考えない。提案されるA/Bテスト案やSEOコンテンツ案を「選ぶだけ」。
+          </p>
+        </div>
+
+        <!-- Step 3: Ship -->
+        <div class="fade-up relative pl-16">
+          <div class="absolute left-0 top-0 w-12 h-12 rounded-full border border-accent/40 bg-accent/10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="step-line"></div>
+          <p class="text-xs tracking-widest uppercase text-accent mb-2 font-medium">Step 03</p>
+          <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Ship — 実装の無人化</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            MCP連携により、エンジニアのバックログに積まず、既存のGitHubリポジトリへ直接デプロイ。
+          </p>
+        </div>
+
+        <!-- Step 4: Learn -->
+        <div class="fade-up relative pl-16">
+          <div class="absolute left-0 top-0 w-12 h-12 rounded-full border border-accent/40 bg-accent/10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </div>
+          <p class="text-xs tracking-widest uppercase text-accent mb-2 font-medium">Step 04</p>
+          <h3 class="text-xl md:text-2xl font-bold text-white mb-3">Learn — 検証の自動化</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            出した施策の良し悪しを判定し、ダメなら自動でロールバック（損切り）。良ければ100点に向けて自動改善。
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+  </section>
+
+  <!-- ===== BOTTOM CTA ===== -->
+  <section id="demo" class="py-24 md:py-32 px-6 relative overflow-hidden">
+    <div class="cta-glow"></div>
+    <div class="max-w-3xl mx-auto text-center relative z-10">
+      <div class="fade-up">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+          優秀な人材を採用するより、<br>最速の仕組みを。
+        </h2>
+        <p class="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
+          「まだ完璧じゃない64点のツール」かもしれませんが、私たちは一緒にプロダクトを育ててくれる初期顧客（Design Partner）を探しています。<br>
+          既存のシステムや社内規定がない今こそ、最速の検証エンジンを手に入れるチャンスです。
+        </p>
+        <a href="#demo" class="btn-primary text-lg px-10 py-5">4%の労力でグロースループを回す（デモを予約）</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="border-t border-border py-8 px-6">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-gray-500 text-sm font-medium">mozule growth</p>
+      <p class="text-gray-600 text-xs">&copy; 2026 mozule inc. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scroll animation script -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

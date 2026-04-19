@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+const team = [
+  {
+    name: '梅本誠也',
+    role: 'CEO / CTO',
+    photo: '/team/takatori.png',
+    bio: 'Mozule代表。学生時代は機械学習とデータエンジニアリングを専攻し、企業での開発も経験。新卒からアプリエンジニアとして幅広く開発を担当。パーソルキャリアにて生成AIを活用したアプリケーション開発に従事。その後グロース上場企業のテックリードとしてプロダクトグロースや、マネージャーとして選考体験のイノベーションに貢献、キャリアを通じて表彰多数。',
+  },
+  {
+    name: '澤重利樹',
+    role: '共同代表 / COO',
+    photo: '/team/sawa.png',
+    bio: 'Mozule共同創業者。営業、組織戦略の責任者。学生時代に1年間のBtoC飛び込み営業を経験し、個人成績では全社平均の3倍の売上をキープ。卒業後はシリアルベンチャー企業にてCOOを勤め、経営戦略、採用戦略、組織課題解決、店舗立ち上げ等、組織マネジメント視点での経営にフルコミット。',
+  },
+  {
+    name: '高取將來',
+    role: '共同代表 / CMO・CSO',
+    photo: '/team/umemoto.jpg',
+    bio: 'Mozule共同創業者。新規事業、マーケティング、経営戦略の責任者。スタートアップ企業にてChief of Staffとして事業戦略立案、集客、営業、新規事業立ち上げ、プロダクト開発、サービス提供等、創業期の経営にフルコミットした後、マーケティング支援の大手へ転職。その後も複数の0から1にコミット。',
+  },
+];
+const services = [
+  { title: '新規事業開発支援', description: '事業アイデアの検証から、MVP開発、グロースまで。スタートアップに必要な検証サイクルを最速で回します。' },
+  { title: 'AIシステムの開発支援', description: '生成AIを活用したプロダクト開発。データ分析基盤の構築から、AIエージェントの実装まで対応します。' },
+  { title: 'マーケティング / 営業支援', description: 'SEO、コンテンツマーケティング、営業戦略の立案から実行まで。データドリブンなグロースを実現します。' },
+];
+---
+<Layout>
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden px-6">
+    <div class="absolute pointer-events-none" style="width:700px;height:700px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle, rgba(77,182,172,0.10) 0%, transparent 70%);"></div>
+    <div class="max-w-3xl mx-auto text-center relative z-10 fade-up">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-6 font-medium">Mozule = 発信源</p>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-white mb-8">
+        関わるすべての人が<br />発信源となり、<br />喜びが循環する仕組みを作る
+      </h1>
+      <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+        一人ひとりがMozuleとなり、共に栄える社会を日本から世界へ
+      </p>
+      <a href="#contact" class="inline-block bg-[#4DB6AC] hover:bg-[#00897B] text-white font-semibold px-8 py-4 rounded-lg transition">
+        お問い合わせ
+      </a>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E1E1E] to-transparent"></div>
+  </section>
+
+  <section id="team" class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-5xl mx-auto">
+      <div class="fade-up text-center mb-16">
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Leadership</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">経営陣</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {team.map((member) => (
+          <div class="fade-up border border-[#1E1E1E] rounded-2xl p-6 bg-[#0F0F0F] hover:border-[#4DB6AC] transition">
+            <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-5">
+              <img src={member.photo} alt={member.name} class="w-full h-full object-cover object-top" />
+            </div>
+            <p class="text-xs tracking-widest uppercase text-[#4DB6AC] mb-2 font-medium">{member.role}</p>
+            <h3 class="text-xl font-bold text-white mb-3">{member.name}</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">{member.bio}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E1E1E] to-transparent"></div>
+  </section>
+
+  <section class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-5xl mx-auto">
+      <div class="fade-up text-center mb-16">
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Services</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">事業内容</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {services.map((s) => (
+          <div class="fade-up border border-[#1E1E1E] rounded-xl p-8 bg-[#0F0F0F] hover:border-[#4DB6AC] transition">
+            <h3 class="text-lg font-bold text-white mb-3">{s.title}</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">{s.description}</p>
+          </div>
+        ))}
+      </div>
+      <div class="text-center mt-12 fade-up">
+        <a href="/services" class="text-sm text-[#4DB6AC] hover:text-white transition">サービス詳細を見る →</a>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E1E1E] to-transparent"></div>
+  </section>
+
+  <section id="contact" class="py-24 md:py-32 px-6 relative overflow-hidden">
+    <div class="absolute pointer-events-none" style="width:800px;height:400px;bottom:0;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse, rgba(77,182,172,0.06) 0%, transparent 70%);"></div>
+    <div class="max-w-3xl mx-auto text-center relative z-10 fade-up">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-6">お問い合わせ</h2>
+      <p class="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
+        Mozuleについてのご質問、パートナーシップのお打ち合わせなどは下記までお気軽にご連絡ください。
+      </p>
+      <a href="mailto:org-owner@mozule.co.jp" class="inline-block bg-[#4DB6AC] hover:bg-[#00897B] text-white font-semibold text-lg px-10 py-5 rounded-lg transition">
+        メールでお問い合わせ
+      </a>
+    </div>
+  </section>
+</Layout>

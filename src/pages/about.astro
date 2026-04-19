@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+const info = [
+  { label: '会社名', value: '株式会社Mozule' },
+  { label: '設立', value: '2026年1月' },
+  { label: '所在地', value: '東京都目黒区自由が丘２丁目１６番１２号 ＲＪ３' },
+  { label: '事業内容', value: '新規事業開発支援、AIシステムの開発支援、マーケティング/営業支援等' },
+  { label: '代表', value: '梅本誠也（CEO / CTO）' },
+  { label: '共同代表', value: '澤重利樹（COO）、高取將來（CMO / CSO）' },
+];
+---
+<Layout title="会社概要">
+  <section class="pt-32 pb-16 px-6 relative">
+    <div class="max-w-3xl mx-auto text-center fade-up">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">About</p>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">会社概要</h1>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E1E1E] to-transparent"></div>
+  </section>
+
+  <section class="py-24 md:py-32 px-6 relative">
+    <div class="max-w-3xl mx-auto">
+      <div class="fade-up">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-8">Mozule（モジュール）= 発信源</h2>
+        <p class="text-gray-400 leading-relaxed mb-6">
+          私たちは「関わるすべての人が発信源になる」世界を目指しています。
+          Mozuleという社名には、一人ひとりが独立した発信源（モジュール）となり、互いにつながり、喜びが循環する仕組みを作りたいという想いが込められています。
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
+        <div class="fade-up border border-[#1E1E1E] rounded-xl p-8 bg-[#0F0F0F]">
+          <p class="text-xs tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Mission</p>
+          <p class="text-xl font-bold text-white leading-relaxed">関わるすべての人が発信源となり、喜びが循環する仕組みを作る</p>
+        </div>
+        <div class="fade-up border border-[#1E1E1E] rounded-xl p-8 bg-[#0F0F0F]">
+          <p class="text-xs tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Vision</p>
+          <p class="text-xl font-bold text-white leading-relaxed">一人ひとりがMozuleとなり、共に栄える社会を日本から世界へ</p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E1E1E] to-transparent"></div>
+  </section>
+
+  <section class="py-24 md:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="fade-up text-center mb-16">
+        <h2 class="text-2xl md:text-3xl font-bold text-white">会社情報</h2>
+      </div>
+      <div class="fade-up border border-[#1E1E1E] rounded-xl p-8 md:p-10 bg-[#0F0F0F]">
+        <dl class="space-y-6">
+          {info.map((item, i) => (
+            <div>
+              <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
+                <dt class="text-sm font-semibold text-[#4DB6AC]">{item.label}</dt>
+                <dd class="col-span-2 md:col-span-3 text-gray-300">{item.value}</dd>
+              </div>
+              {i < info.length - 1 && <div class="h-px bg-[#1E1E1E] mt-6"></div>}
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
+</Layout>
