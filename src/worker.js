@@ -1,5 +1,3 @@
-import { EmailMessage } from 'cloudflare:email';
-
 const MAX_LENGTHS = {
   name: 120,
   company: 160,
@@ -70,46 +68,18 @@ const submissionText = (submission) =>
     submission.message,
   ].join('\n');
 
-const sanitizeHeader = (value) => String(value || '').replace(/[\r\n]/g, ' ').trim();
-
-const encodeSubject = (subject) => {
-  const bytes = new TextEncoder().encode(subject);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return `=?UTF-8?B?${btoa(binary)}?=`;
-};
-
-const createMessageId = () => `<${Date.now()}.${crypto.randomUUID()}@mozule.co.jp>`;
-
-const createEmailBody = (submission) => {
-  const text = submissionText(submission);
-  return [
-    'MIME-Version: 1.0',
-    `Date: ${new Date().toUTCString()}`,
-    `Message-ID: ${createMessageId()}`,
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-    `From: Mozule Contact <noreply@mozule.co.jp>`,
-    `To: masaki.takatori@mozule.co.jp`,
-    `Reply-To: ${sanitizeHeader(submission.email)}`,
-    `Subject: ${encodeSubject(`[Mozule] ${submission.topic} inquiry from ${submission.name}`)}`,
-    '',
-    text,
-  ].join('\r\n');
-};
+const CONTACT_TO = 'masaki.takatori@mozule.co.jp';
 
 const notifyCloudflareEmail = async (submission, env) => {
   if (!env.CONTACT_EMAIL) return false;
 
-  const message = new EmailMessage(
-    'noreply@mozule.co.jp',
-    'masaki.takatori@mozule.co.jp',
-    createEmailBody(submission)
-  );
-
-  await env.CONTACT_EMAIL.send(message);
+  await env.CONTACT_EMAIL.send({
+    to: CONTACT_TO,
+    from: { email: 'noreply@mozule.co.jp', name: 'Mozule Contact' },
+    replyTo: submission.email,
+    subject: `[Mozule] ${submission.topic} inquiry from ${submission.name}`,
+    text: submissionText(submission),
+  });
   return true;
 };
 
