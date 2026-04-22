@@ -4,8 +4,8 @@ compatibility_date = "2024-01-01"
 workers_dev = false
 
 [[routes]]
-pattern = "mozule.co.jp"
-custom_domain = true
+pattern = "mozule.co.jp/*"
+zone_name = "mozule.co.jp"
 
 [assets]
 directory = "./dist"
