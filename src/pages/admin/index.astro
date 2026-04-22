@@ -1,15 +1,17 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { adminSeoPages, adminSeoSummary, seoActionLibrary } from '../../data/adminSeo';
+import { adminSeoPages, adminSeoSummary, adminTopicClusters, seoActionLibrary } from '../../data/adminSeo';
 
 const focusPages = adminSeoPages
   .map((page, index) => ({ page, index }))
   .sort((a, b) => a.page.score - b.page.score)
   .slice(0, 8);
 const adminData = JSON.stringify(adminSeoPages);
+const clusterData = JSON.stringify(adminTopicClusters);
 ---
 <AdminLayout title="SEO Control Room">
   <script id="admin-seo-data" type="application/json" set:html={adminData}></script>
+  <script id="admin-cluster-data" type="application/json" set:html={clusterData}></script>
 
   <div class="min-h-screen">
     <header class="sticky top-0 z-40 border-b border-white/10 bg-[#0B0D10]/90 backdrop-blur-xl">
@@ -36,7 +38,7 @@ const adminData = JSON.stringify(adminSeoPages);
             ['Dashboard', '今日の改善'],
             ['Pages', 'ページ別SEO'],
             ['Opportunities', '改善候補'],
-            ['Internal Links', '内部リンク'],
+            ['Clusters', 'ノード可視化'],
             ['Schema', '構造化データ'],
             ['Indexing', '公開制御'],
           ].map(([label, meta], index) => (
@@ -66,7 +68,7 @@ const adminData = JSON.stringify(adminSeoPages);
                 <h1 class="mt-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl">専門家のSEO判断を、非エンジニアの操作に落とす</h1>
                 <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-400">ページを選ぶと、KW/THP、AIO、E-E-A-T、内部リンク、構造化データ、index制御の改善カードだけが出ます。公開書き換えAPIは未接続なので、まずはPR前提の安全な作業台です。</p>
               </div>
-              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 md:w-[520px]">
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-5 md:w-[640px]">
                 <div class="rounded-md border border-white/10 bg-black/20 p-3">
                   <p class="text-xs text-gray-500">Pages</p>
                   <p class="mt-1 text-2xl font-bold text-white">{adminSeoSummary.pageCount}</p>
@@ -78,6 +80,10 @@ const adminData = JSON.stringify(adminSeoPages);
                 <div class="rounded-md border border-white/10 bg-black/20 p-3">
                   <p class="text-xs text-gray-500">Articles</p>
                   <p class="mt-1 text-2xl font-bold text-white">{adminSeoSummary.articleCount}</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-xs text-gray-500">Clusters</p>
+                  <p class="mt-1 text-2xl font-bold text-white">{adminSeoSummary.clusterCount}</p>
                 </div>
                 <div class="rounded-md border border-white/10 bg-black/20 p-3">
                   <p class="text-xs text-gray-500">Avg score</p>
@@ -254,20 +260,77 @@ const adminData = JSON.stringify(adminSeoPages);
         </section>
 
         <section id="section-3" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Internal Links</p>
-              <h2 class="mt-2 text-xl font-bold text-white">トピッククラスター作業台</h2>
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Topic Cluster Map</p>
+              <h2 class="mt-2 text-xl font-bold text-white">ノードで見るSEOクラスター</h2>
+              <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-400">中心ノードがピラー、外側が商用LP・コラム・比較・連携ページです。ノードを押すと編集対象ページが切り替わります。</p>
             </div>
-            <span class="text-sm text-gray-500">ピラーへ評価を集め、枝葉は関連度でつなぐ</span>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {adminTopicClusters.map((cluster, index) => (
+                <button type="button" data-cluster-id={cluster.id} class={`cluster-pick rounded-md border px-3 py-2 text-left transition ${index === 0 ? 'border-[#4DB6AC]/70 bg-[#4DB6AC]/15' : 'border-white/10 bg-black/20 hover:border-[#4DB6AC]/60'}`}>
+                  <span class="block truncate text-xs font-bold text-white">{cluster.label}</span>
+                  <span class="mt-1 block text-[11px] text-gray-500">{cluster.nodeCount} nodes / {cluster.averageScore}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div class="mt-5 grid gap-4 md:grid-cols-4">
-            {['ピラーページを選ぶ', '枝葉ページを選ぶ', 'アンカーテキストを作る', 'PR差分へ反映'].map((step, index) => (
-              <div class="rounded-md border border-white/10 bg-black/20 p-4">
-                <p class="text-xs font-bold text-[#4DB6AC]">{String(index + 1).padStart(2, '0')}</p>
-                <p class="mt-3 text-sm font-semibold text-white">{step}</p>
+
+          <div class="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <div class="relative min-h-[520px] overflow-hidden rounded-md border border-white/10 bg-[#080B0F]">
+              <div class="absolute left-4 top-4 z-10 flex flex-wrap gap-2">
+                {[
+                  ['pillar', 'Pillar', 'bg-[#4DB6AC]'],
+                  ['commercial', 'LP', 'bg-sky-400'],
+                  ['learn', 'Learn', 'bg-amber-300'],
+                  ['compare', 'Compare', 'bg-violet-300'],
+                  ['integration', 'Integration', 'bg-lime-300'],
+                  ['trust', 'Trust', 'bg-rose-300'],
+                ].map(([type, label, color]) => (
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[11px] font-semibold text-gray-300">
+                    <span class={`h-2 w-2 rounded-full ${color}`}></span>{label}
+                  </span>
+                ))}
               </div>
-            ))}
+              <svg data-cluster-map viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" class="h-[520px] w-full"></svg>
+            </div>
+
+            <aside class="rounded-md border border-white/10 bg-black/20 p-4">
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Cluster detail</p>
+              <h3 class="mt-2 text-lg font-bold text-white" data-cluster-title>Cluster</h3>
+              <p class="mt-2 text-sm leading-6 text-gray-400" data-cluster-intent>Intent</p>
+
+              <div class="mt-5 grid grid-cols-3 gap-2">
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-[11px] text-gray-500">Nodes</p>
+                  <p class="mt-1 text-xl font-bold text-white" data-cluster-nodes>0</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-[11px] text-gray-500">Edges</p>
+                  <p class="mt-1 text-xl font-bold text-white" data-cluster-edges>0</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-[11px] text-gray-500">Avg</p>
+                  <p class="mt-1 text-xl font-bold text-[#4DB6AC]" data-cluster-score>0</p>
+                </div>
+              </div>
+
+              <div class="mt-5 rounded-md border border-white/10 bg-[#0B0D10] p-4">
+                <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Selected node</p>
+                <h4 class="mt-2 text-sm font-bold leading-5 text-white" data-node-title>Node</h4>
+                <p class="mt-2 text-xs leading-5 text-gray-500" data-node-path>/growth/</p>
+                <p class="mt-3 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-xs font-semibold text-gray-300" data-node-keyword>KW</p>
+                <button type="button" data-open-node-page class="mt-4 flex h-9 w-full items-center justify-center rounded-md bg-[#4DB6AC] text-xs font-bold text-white transition hover:bg-[#00897B]">このページを編集</button>
+              </div>
+
+              <div class="mt-5">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-sm font-bold text-white">補完ポイント</h4>
+                  <span class="text-xs text-gray-500">SEOの極意ベース</span>
+                </div>
+                <ul class="mt-3 space-y-2 text-sm leading-6 text-gray-400" data-cluster-gaps></ul>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -308,12 +371,38 @@ const adminData = JSON.stringify(adminSeoPages);
 
   <script>
     const dataElement = document.getElementById('admin-seo-data');
+    const clusterElement = document.getElementById('admin-cluster-data');
     const pages = JSON.parse(dataElement?.textContent || '[]');
+    const clusters = JSON.parse(clusterElement?.textContent || '[]');
     let selectedPage = pages[0];
+    let selectedCluster = clusters[0];
+    let selectedNode = null;
     const draft = new Map();
+    const pageByPath = new Map(pages.map((page) => [page.path, page]));
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    const nodeMeta = {
+      pillar: { fill: '#4DB6AC', stroke: '#B2DFDB', label: 'Pillar' },
+      commercial: { fill: '#38BDF8', stroke: '#BAE6FD', label: 'LP' },
+      learn: { fill: '#FCD34D', stroke: '#FEF3C7', label: 'Learn' },
+      compare: { fill: '#C4B5FD', stroke: '#EDE9FE', label: 'Compare' },
+      integration: { fill: '#BEF264', stroke: '#ECFCCB', label: 'Integration' },
+      trust: { fill: '#FDA4AF', stroke: '#FFE4E6', label: 'Trust' },
+    };
+
+    const truncateLabel = (value, limit = 16) => {
+      const text = String(value || '');
+      return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
+    };
+
+    const svgNode = (name, attrs = {}) => {
+      const node = document.createElementNS(svgNS, name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
+      return node;
+    };
 
     const healthLabel = (score) => {
       if (score >= 88) return '公開品質に近い';
@@ -403,6 +492,154 @@ const adminData = JSON.stringify(adminSeoPages);
       });
     };
 
+    const renderNodeDetail = () => {
+      if (!selectedNode) return;
+      const meta = nodeMeta[selectedNode.type] || nodeMeta.commercial;
+      $('[data-node-title]').textContent = `${truncateLabel(selectedNode.label, 34)} / ${meta.label}`;
+      $('[data-node-path]').textContent = selectedNode.path;
+      $('[data-node-keyword]').textContent = `${selectedNode.keyword} / score ${selectedNode.score}`;
+    };
+
+    const renderClusterDetail = (cluster) => {
+      $('[data-cluster-title]').textContent = cluster.label;
+      $('[data-cluster-intent]').textContent = cluster.intent;
+      $('[data-cluster-nodes]').textContent = cluster.nodeCount;
+      $('[data-cluster-edges]').textContent = cluster.edgeCount;
+      $('[data-cluster-score]').textContent = cluster.averageScore;
+
+      const gaps = $('[data-cluster-gaps]');
+      if (gaps) {
+        gaps.innerHTML = '';
+        cluster.gaps.forEach((gap) => {
+          const item = document.createElement('li');
+          item.className = 'flex gap-2';
+          const dot = document.createElement('span');
+          dot.className = 'mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#4DB6AC]';
+          const text = document.createElement('span');
+          text.textContent = gap;
+          item.append(dot, text);
+          gaps.append(item);
+        });
+      }
+
+      $$('.cluster-pick').forEach((button) => {
+        const active = button.dataset.clusterId === cluster.id;
+        button.className = `cluster-pick rounded-md border px-3 py-2 text-left transition ${
+          active ? 'border-[#4DB6AC]/70 bg-[#4DB6AC]/15' : 'border-white/10 bg-black/20 hover:border-[#4DB6AC]/60'
+        }`;
+      });
+      renderNodeDetail();
+    };
+
+    const renderClusterMap = (cluster) => {
+      const svg = $('[data-cluster-map]');
+      if (!svg || !cluster) return;
+      selectedCluster = cluster;
+      selectedNode = cluster.nodes.find((node) => node.path === selectedNode?.path) || cluster.nodes.find((node) => node.path === cluster.pillarPath) || cluster.nodes[0];
+      svg.innerHTML = '';
+
+      const defs = svgNode('defs');
+      const glow = svgNode('filter', { id: 'node-glow', x: '-40%', y: '-40%', width: '180%', height: '180%' });
+      glow.append(svgNode('feGaussianBlur', { stdDeviation: '1.2', result: 'blur' }));
+      glow.append(svgNode('feMerge'));
+      glow.lastChild.append(svgNode('feMergeNode', { in: 'blur' }));
+      glow.lastChild.append(svgNode('feMergeNode', { in: 'SourceGraphic' }));
+      defs.append(glow);
+      svg.append(defs);
+
+      [22, 34, 46].forEach((rx) => {
+        svg.append(svgNode('ellipse', {
+          cx: 50,
+          cy: 50,
+          rx,
+          ry: Math.round(rx * 0.72),
+          fill: 'none',
+          stroke: 'rgba(255,255,255,0.07)',
+          'stroke-width': 0.35,
+        }));
+      });
+
+      const nodesByPath = new Map(cluster.nodes.map((node) => [node.path, node]));
+      cluster.edges.forEach((edge) => {
+        const source = nodesByPath.get(edge.source);
+        const target = nodesByPath.get(edge.target);
+        if (!source || !target) return;
+        svg.append(svgNode('line', {
+          x1: source.x,
+          y1: source.y,
+          x2: target.x,
+          y2: target.y,
+          stroke: edge.kind === 'pillar' ? 'rgba(77,182,172,0.35)' : 'rgba(255,255,255,0.18)',
+          'stroke-width': edge.kind === 'pillar' ? 0.7 : 0.35,
+          'stroke-linecap': 'round',
+        }));
+      });
+
+      cluster.nodes.forEach((node) => {
+        const meta = nodeMeta[node.type] || nodeMeta.commercial;
+        const group = svgNode('g', { role: 'button', tabindex: '0', 'data-node-path': node.path });
+        group.style.cursor = 'pointer';
+
+        if (selectedNode?.path === node.path) {
+          group.append(svgNode('circle', {
+            cx: node.x,
+            cy: node.y,
+            r: node.radius + 2.8,
+            fill: meta.fill,
+            opacity: 0.14,
+            filter: 'url(#node-glow)',
+          }));
+        }
+
+        group.append(svgNode('circle', {
+          cx: node.x,
+          cy: node.y,
+          r: node.radius,
+          fill: meta.fill,
+          stroke: selectedNode?.path === node.path ? '#FFFFFF' : meta.stroke,
+          'stroke-width': selectedNode?.path === node.path ? 0.9 : 0.45,
+        }));
+
+        const score = svgNode('text', {
+          x: node.x,
+          y: node.y + 1.2,
+          'text-anchor': 'middle',
+          'font-size': node.type === 'pillar' ? 3.4 : 2.6,
+          'font-weight': 800,
+          fill: '#081014',
+        });
+        score.textContent = node.score;
+        group.append(score);
+
+        const label = svgNode('text', {
+          x: node.x,
+          y: node.y + node.radius + 4.3,
+          'text-anchor': 'middle',
+          'font-size': node.type === 'pillar' ? 3.1 : 2.25,
+          'font-weight': node.type === 'pillar' ? 800 : 650,
+          fill: node.type === 'pillar' ? '#EFFFFD' : '#D1D5DB',
+        });
+        label.textContent = truncateLabel(node.keyword || node.label, node.type === 'pillar' ? 18 : 14);
+        group.append(label);
+
+        group.addEventListener('click', () => {
+          selectedNode = node;
+          const page = pageByPath.get(node.path);
+          if (page) renderPage(page);
+          renderClusterMap(cluster);
+        });
+        group.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            group.dispatchEvent(new Event('click'));
+          }
+        });
+        svg.append(group);
+      });
+
+      renderClusterDetail(cluster);
+    };
+
     const renderPage = (page) => {
       selectedPage = page;
       $('[data-page-title]').textContent = page.title;
@@ -425,6 +662,20 @@ const adminData = JSON.stringify(adminSeoPages);
         const index = Number(row.dataset.pageIndex);
         if (!Number.isNaN(index) && pages[index]) renderPage(pages[index]);
       });
+    });
+
+    $$('.cluster-pick').forEach((button) => {
+      button.addEventListener('click', () => {
+        const cluster = clusters.find((item) => item.id === button.dataset.clusterId);
+        if (cluster) renderClusterMap(cluster);
+      });
+    });
+
+    $('[data-open-node-page]')?.addEventListener('click', () => {
+      const page = pageByPath.get(selectedNode?.path);
+      if (!page) return;
+      renderPage(page);
+      document.getElementById('section-1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     $('[data-page-search]')?.addEventListener('input', (event) => {
@@ -489,5 +740,6 @@ const adminData = JSON.stringify(adminSeoPages);
     });
 
     renderPage(pages[0]);
+    renderClusterMap(clusters[0]);
   </script>
 </AdminLayout>
