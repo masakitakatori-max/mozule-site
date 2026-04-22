@@ -81,10 +81,14 @@ const encodeSubject = (subject) => {
   return `=?UTF-8?B?${btoa(binary)}?=`;
 };
 
+const createMessageId = () => `<${Date.now()}.${crypto.randomUUID()}@mozule.co.jp>`;
+
 const createEmailBody = (submission) => {
   const text = submissionText(submission);
   return [
     'MIME-Version: 1.0',
+    `Date: ${new Date().toUTCString()}`,
+    `Message-ID: ${createMessageId()}`,
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: 8bit',
     `From: Mozule Contact <noreply@mozule.co.jp>`,
@@ -193,7 +197,8 @@ const handleContact = async (request, env) => {
     }
 
     return json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error('Contact form notification failed', error);
     return json({ ok: false, message: '送信に失敗しました。時間をおいて再度お試しください。' }, 502);
   }
 };
