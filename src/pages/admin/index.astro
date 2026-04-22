@@ -35,16 +35,18 @@ const clusterData = JSON.stringify(adminTopicClusters);
       <aside class="border-b border-white/10 bg-[#0F1216] px-5 py-5 lg:min-h-[calc(100vh-64px)] lg:border-b-0 lg:border-r">
         <nav class="space-y-1" aria-label="Admin sections">
           {[
-            ['Dashboard', '今日の改善'],
-            ['Pages', 'ページ別SEO'],
-            ['Opportunities', '改善候補'],
-            ['Clusters', 'ノード可視化'],
-            ['Schema', '構造化データ'],
-            ['Indexing', '公開制御'],
-          ].map(([label, meta], index) => (
-            <a href={`#section-${index}`} class={`flex items-center justify-between rounded-md px-3 py-3 text-sm transition ${index === 0 ? 'bg-[#4DB6AC]/15 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
-              <span class="font-semibold">{label}</span>
-              <span class="text-xs text-gray-500">{meta}</span>
+            { label: 'Dashboard', meta: '今日の改善', href: '#section-0' },
+            { label: 'Pages', meta: 'ページ別SEO', href: '#section-1' },
+            { label: 'Content', meta: '本文編集', href: '#section-6' },
+            { label: 'Visual', meta: '見た目編集', href: '#section-7' },
+            { label: 'Opportunities', meta: '改善候補', href: '#section-2' },
+            { label: 'Clusters', meta: 'ノード可視化', href: '#section-3' },
+            { label: 'Schema', meta: '構造化データ', href: '#section-4' },
+            { label: 'Indexing', meta: '公開制御', href: '#section-5' },
+          ].map((item, index) => (
+            <a href={item.href} class={`flex items-center justify-between rounded-md px-3 py-3 text-sm transition ${index === 0 ? 'bg-[#4DB6AC]/15 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+              <span class="font-semibold">{item.label}</span>
+              <span class="text-xs text-gray-500">{item.meta}</span>
             </a>
           ))}
         </nav>
@@ -245,6 +247,154 @@ const clusterData = JSON.stringify(adminTopicClusters);
           </div>
         </section>
 
+        <section id="section-6" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
+          <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Rich text CMS</p>
+              <h2 class="mt-2 text-xl font-bold text-white">HTML本文をブロック単位で編集</h2>
+              <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-400">見出し、太字、リスト、引用、リンク、画像枠をここで編集します。保存するとGitHub PRで `sections` に反映されます。</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" data-section-add class="rounded-md border border-[#4DB6AC]/40 px-3 py-2 text-xs font-bold text-[#B2DFDB] transition hover:bg-[#4DB6AC]/10">セクション追加</button>
+              <button type="button" data-section-duplicate class="rounded-md border border-white/10 px-3 py-2 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60">複製</button>
+              <button type="button" data-section-delete class="rounded-md border border-rose-400/30 px-3 py-2 text-xs font-bold text-rose-200 transition hover:bg-rose-500/10">削除</button>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)_340px]">
+            <div class="rounded-md border border-white/10 bg-black/20">
+              <div class="border-b border-white/10 p-4">
+                <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Sections</p>
+              </div>
+              <div class="max-h-[560px] overflow-y-auto p-2" data-section-list></div>
+            </div>
+
+            <div class="rounded-md border border-white/10 bg-[#0B0D10] p-4">
+              <label class="block">
+                <span class="text-xs font-semibold text-gray-500">Section heading</span>
+                <input data-section-title class="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm font-semibold text-white outline-none focus:border-[#4DB6AC]" />
+              </label>
+
+              <div class="mt-4 flex flex-wrap items-center gap-2 rounded-md border border-white/10 bg-black/20 p-2">
+                {[
+                  ['p', 'P'],
+                  ['h2', 'H2'],
+                  ['h3', 'H3'],
+                  ['blockquote', '引用'],
+                ].map(([block, label]) => (
+                  <button type="button" data-format-block={block} class="h-8 rounded-md border border-white/10 px-2 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60 hover:text-white">{label}</button>
+                ))}
+                <span class="mx-1 h-5 w-px bg-white/10"></span>
+                {[
+                  ['bold', 'B'],
+                  ['italic', 'I'],
+                  ['underline', 'U'],
+                  ['insertUnorderedList', '• List'],
+                ].map(([command, label]) => (
+                  <button type="button" data-rich-command={command} class="h-8 rounded-md border border-white/10 px-2 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60 hover:text-white">{label}</button>
+                ))}
+                <button type="button" data-rich-link class="h-8 rounded-md border border-white/10 px-2 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60 hover:text-white">Link</button>
+              </div>
+
+              <div data-rich-editor contenteditable="true" spellcheck="false" class="mt-3 min-h-[280px] rounded-md border border-white/10 bg-black/20 px-4 py-4 text-sm leading-7 text-gray-100 outline-none focus:border-[#4DB6AC]"></div>
+
+              <label class="mt-4 block">
+                <span class="text-xs font-semibold text-gray-500">Bullet items</span>
+                <textarea data-section-items rows="4" class="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/20 px-3 py-3 text-sm leading-6 text-white outline-none focus:border-[#4DB6AC]" placeholder="1行に1項目"></textarea>
+              </label>
+            </div>
+
+            <aside class="rounded-md border border-white/10 bg-black/20 p-4">
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Image slot</p>
+              <p class="mt-2 text-sm leading-6 text-gray-400">画像を入れる場所をここで決めます。まずはURL指定、次フェーズでアップロード/R2保管にできます。</p>
+              <label class="mt-4 block">
+                <span class="text-xs text-gray-500">Image URL</span>
+                <input data-section-image-src class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" placeholder="/images/example.webp or https://..." />
+              </label>
+              <label class="mt-3 block">
+                <span class="text-xs text-gray-500">Alt text</span>
+                <input data-section-image-alt class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" />
+              </label>
+              <label class="mt-3 block">
+                <span class="text-xs text-gray-500">Caption</span>
+                <input data-section-image-caption class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" />
+              </label>
+              <div class="mt-4 grid grid-cols-2 gap-2">
+                <button type="button" data-section-up class="h-9 rounded-md border border-white/10 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60">上へ</button>
+                <button type="button" data-section-down class="h-9 rounded-md border border-white/10 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60">下へ</button>
+              </div>
+              <p class="mt-4 rounded-md border border-white/10 bg-[#0B0D10] px-3 py-2 text-xs leading-5 text-gray-400" data-content-status>ページを選ぶと本文ブロックを編集できます。</p>
+            </aside>
+          </div>
+        </section>
+
+        <section id="section-7" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
+          <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Visual editor</p>
+              <h2 class="mt-2 text-xl font-bold text-white">ページの見た目をキャンバスで編集</h2>
+              <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-400">セクションを選び、レイアウト、トーン、文字サイズ、揃えを変えます。公開ページと同じデータに保存されます。</p>
+            </div>
+            <a href="/growth/" target="_blank" rel="noreferrer" class="rounded-md border border-white/10 px-3 py-2 text-xs font-bold text-gray-300 transition hover:border-[#4DB6AC]/60">公開ページを開く</a>
+          </div>
+
+          <div class="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="overflow-hidden rounded-md border border-white/10 bg-[#06080B]">
+              <div class="border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Canvas preview</div>
+              <div class="max-h-[720px] overflow-y-auto" data-visual-canvas></div>
+            </div>
+
+            <aside class="rounded-md border border-white/10 bg-black/20 p-4">
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Inspector</p>
+              <h3 class="mt-2 text-sm font-bold text-white" data-visual-selected-title>Section</h3>
+              <div class="mt-4 space-y-3">
+                <label class="block">
+                  <span class="text-xs text-gray-500">Layout</span>
+                  <select data-visual-layout class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                    <option value="text">Text only</option>
+                    <option value="split-right">Text / Image</option>
+                    <option value="split-left">Image / Text</option>
+                    <option value="feature">Wide feature</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-xs text-gray-500">Tone</span>
+                  <select data-visual-tone class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                    <option value="default">Default</option>
+                    <option value="muted">Muted band</option>
+                    <option value="accent">Accent band</option>
+                    <option value="light">Light block</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-xs text-gray-500">Text align</span>
+                  <select data-visual-align class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-xs text-gray-500">Heading size</span>
+                  <select data-visual-heading-size class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                    <option value="xl">XL</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-xs text-gray-500">Body size</span>
+                  <select data-visual-body-size class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                  </select>
+                </label>
+              </div>
+              <p class="mt-4 rounded-md border border-white/10 bg-[#0B0D10] px-3 py-2 text-xs leading-5 text-gray-400">自由配置/ドラッグリサイズは次フェーズで、まずはSEOページとして崩れない範囲の見た目編集に絞っています。</p>
+            </aside>
+          </div>
+        </section>
+
         <section id="section-2" class="mt-6 grid gap-5 xl:grid-cols-3">
           {[
             ['低CTR改善', 'Titleとdescriptionを検索意図に合わせ、上部に短い回答を置く。', 'KW・THP / UX'],
@@ -404,6 +554,82 @@ const clusterData = JSON.stringify(adminTopicClusters);
       return node;
     };
 
+    const sectionDrafts = new Map();
+    let selectedSectionIndex = 0;
+    let syncingEditor = false;
+
+    const escapeHtml = (value) =>
+      String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const stripHtml = (value) => {
+      const container = document.createElement('div');
+      container.innerHTML = value || '';
+      return container.textContent?.trim() || '';
+    };
+
+    const textToHtml = (value) =>
+      String(value || '')
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean)
+        .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+        .join('');
+
+    const cloneSection = (section = {}) => ({
+      title: section.title || '新しいセクション',
+      body: section.body || stripHtml(section.bodyHtml) || '',
+      bodyHtml: section.bodyHtml || textToHtml(section.body || ''),
+      items: Array.isArray(section.items) ? [...section.items] : [],
+      image: section.image ? { ...section.image } : { src: '', alt: '', caption: '' },
+      visual: {
+        layout: section.visual?.layout || (section.image?.src ? 'split-right' : 'text'),
+        tone: section.visual?.tone || 'default',
+        align: section.visual?.align || 'left',
+        headingSize: section.visual?.headingSize || 'lg',
+        bodySize: section.visual?.bodySize || 'md',
+      },
+    });
+
+    const getPageSections = (page = selectedPage) => {
+      if (!page) return [];
+      if (!sectionDrafts.has(page.path)) {
+        sectionDrafts.set(page.path, (page.sections || []).map(cloneSection));
+      }
+      return sectionDrafts.get(page.path);
+    };
+
+    const selectedSection = () => {
+      const sections = getPageSections();
+      if (!sections.length) sections.push(cloneSection());
+      selectedSectionIndex = Math.min(Math.max(selectedSectionIndex, 0), sections.length - 1);
+      return sections[selectedSectionIndex];
+    };
+
+    const normalizeSectionForSave = (section) => {
+      const image =
+        section.image?.src?.trim()
+          ? {
+              src: section.image.src.trim(),
+              alt: section.image.alt?.trim() || section.title,
+              ...(section.image.caption?.trim() ? { caption: section.image.caption.trim() } : {}),
+            }
+          : undefined;
+      const items = (section.items || []).map((item) => item.trim()).filter(Boolean);
+      return {
+        title: section.title.trim() || 'Untitled section',
+        body: stripHtml(section.bodyHtml) || section.body || '',
+        bodyHtml: section.bodyHtml || textToHtml(section.body || ''),
+        ...(items.length ? { items } : {}),
+        ...(image ? { image } : {}),
+        visual: section.visual || {},
+      };
+    };
+
     const healthLabel = (score) => {
       if (score >= 88) return '公開品質に近い';
       if (score >= 76) return '専門家レビュー推奨';
@@ -490,6 +716,180 @@ const clusterData = JSON.stringify(adminTopicClusters);
         });
         taskList.append(button);
       });
+    };
+
+    const sectionPreviewClass = (section, active = false) => {
+      const visual = section.visual || {};
+      const tone = visual.tone || 'default';
+      const align = visual.align || 'left';
+      const layout = visual.layout || 'text';
+      const base = 'group w-full border-b border-white/10 px-6 py-10 text-left transition';
+      const toneClass =
+        tone === 'light'
+          ? 'bg-white text-[#11151A]'
+          : tone === 'accent'
+            ? 'bg-[#4DB6AC]/10 text-white'
+            : tone === 'muted'
+              ? 'bg-[#0F1216] text-white'
+              : 'bg-[#06080B] text-white';
+      const layoutClass = layout === 'feature' ? 'md:col-span-2' : '';
+      const alignClass = align === 'center' ? 'text-center' : '';
+      const activeClass = active ? 'outline outline-2 outline-[#4DB6AC] outline-offset-[-2px]' : 'hover:bg-[#0F1216]';
+      return [base, toneClass, layoutClass, alignClass, activeClass].filter(Boolean).join(' ');
+    };
+
+    const sectionHeadingPreviewClass = (section) => {
+      const size = section.visual?.headingSize || 'lg';
+      return size === 'xl' ? 'text-3xl md:text-5xl' : size === 'md' ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl';
+    };
+
+    const sectionBodyPreviewClass = (section) => {
+      const size = section.visual?.bodySize || 'md';
+      const tone = section.visual?.tone || 'default';
+      const color = tone === 'light' ? 'text-[#263238]' : 'text-gray-300';
+      const sizeClass = size === 'lg' ? 'text-lg' : size === 'sm' ? 'text-sm' : 'text-base';
+      return [color, sizeClass, 'mt-4 leading-7'].join(' ');
+    };
+
+    const renderImagePreview = (section) => {
+      if (section.image?.src) {
+        return `
+          <figure>
+            <img src="${escapeHtml(section.image.src)}" alt="${escapeHtml(section.image.alt || section.title)}" class="aspect-[4/3] w-full object-cover" />
+            ${section.image.caption ? `<figcaption class="mt-2 text-xs text-gray-500">${escapeHtml(section.image.caption)}</figcaption>` : ''}
+          </figure>
+        `;
+      }
+      return `
+        <div class="flex aspect-[4/3] w-full items-center justify-center border border-dashed border-white/20 bg-black/20 text-xs font-semibold text-gray-500">
+          画像スロット
+        </div>
+      `;
+    };
+
+    const renderSectionList = () => {
+      const list = $('[data-section-list]');
+      if (!list) return;
+      const sections = getPageSections();
+      list.innerHTML = '';
+      sections.forEach((section, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.sectionIndex = String(index);
+        button.className = `flex w-full gap-3 rounded-md px-3 py-3 text-left transition ${
+          index === selectedSectionIndex ? 'bg-[#4DB6AC]/15 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+        }`;
+        button.innerHTML = `
+          <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 text-[11px] font-bold">${index + 1}</span>
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-bold">${escapeHtml(section.title)}</span>
+            <span class="mt-1 block truncate text-xs text-gray-500">${escapeHtml(stripHtml(section.bodyHtml).slice(0, 72))}</span>
+          </span>
+        `;
+        button.addEventListener('click', () => {
+          syncSectionEditor();
+          selectedSectionIndex = index;
+          renderContentEditor();
+          renderVisualCanvas();
+        });
+        list.append(button);
+      });
+    };
+
+    const renderContentEditor = () => {
+      const section = selectedSection();
+      syncingEditor = true;
+      $('[data-section-title]').value = section.title || '';
+      $('[data-rich-editor]').innerHTML = section.bodyHtml || textToHtml(section.body || '');
+      $('[data-section-items]').value = (section.items || []).join('\n');
+      $('[data-section-image-src]').value = section.image?.src || '';
+      $('[data-section-image-alt]').value = section.image?.alt || '';
+      $('[data-section-image-caption]').value = section.image?.caption || '';
+      $('[data-content-status]').textContent = `${selectedPage.path} の ${selectedSectionIndex + 1}番目の本文ブロックを編集中`;
+      renderVisualInspector();
+      syncingEditor = false;
+    };
+
+    const syncSectionEditor = () => {
+      if (syncingEditor || !selectedPage) return;
+      const section = selectedSection();
+      section.title = $('[data-section-title]')?.value || section.title || '新しいセクション';
+      section.bodyHtml = $('[data-rich-editor]')?.innerHTML || '';
+      section.body = stripHtml(section.bodyHtml);
+      section.items = ($('[data-section-items]')?.value || '')
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean);
+      section.image = {
+        src: $('[data-section-image-src]')?.value.trim() || '',
+        alt: $('[data-section-image-alt]')?.value.trim() || section.title,
+        caption: $('[data-section-image-caption]')?.value.trim() || '',
+      };
+      renderSectionList();
+      renderVisualCanvas(false);
+      renderVisualInspector();
+    };
+
+    const renderVisualInspector = () => {
+      const section = selectedSection();
+      const visual = section.visual || {};
+      section.visual = visual;
+      $('[data-visual-selected-title]').textContent = section.title || 'Section';
+      $('[data-visual-layout]').value = visual.layout || 'text';
+      $('[data-visual-tone]').value = visual.tone || 'default';
+      $('[data-visual-align]').value = visual.align || 'left';
+      $('[data-visual-heading-size]').value = visual.headingSize || 'lg';
+      $('[data-visual-body-size]').value = visual.bodySize || 'md';
+    };
+
+    const renderVisualCanvas = (renderInspector = true) => {
+      const canvas = $('[data-visual-canvas]');
+      if (!canvas) return;
+      const sections = getPageSections();
+      canvas.innerHTML = '';
+      sections.forEach((section, index) => {
+        const visual = section.visual || {};
+        const layout = visual.layout || (section.image?.src ? 'split-right' : 'text');
+        const split = section.image?.src || layout === 'split-left' || layout === 'split-right';
+        const sectionButton = document.createElement('button');
+        sectionButton.type = 'button';
+        sectionButton.dataset.visualSectionIndex = String(index);
+        sectionButton.className = sectionPreviewClass(section, index === selectedSectionIndex);
+        const textHtml = `
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Section ${String(index + 1).padStart(2, '0')}</p>
+            <h3 class="${sectionHeadingPreviewClass(section)} mt-3 font-extrabold leading-tight">${escapeHtml(section.title)}</h3>
+            <div class="${sectionBodyPreviewClass(section)}">${section.bodyHtml || textToHtml(section.body || '')}</div>
+            ${(section.items || []).length ? `<ul class="mt-5 space-y-2 text-sm text-gray-300">${section.items.map((item) => `<li>・${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+          </div>
+        `;
+        if (split) {
+          const imageHtml = renderImagePreview(section);
+          sectionButton.innerHTML = `
+            <div class="grid gap-6 md:grid-cols-2 md:items-center">
+              ${layout === 'split-left' ? imageHtml : textHtml}
+              ${layout === 'split-left' ? textHtml : imageHtml}
+            </div>
+          `;
+        } else {
+          sectionButton.innerHTML = textHtml;
+        }
+        sectionButton.addEventListener('click', () => {
+          syncSectionEditor();
+          selectedSectionIndex = index;
+          renderSectionList();
+          renderContentEditor();
+          renderVisualCanvas();
+        });
+        canvas.append(sectionButton);
+      });
+      if (renderInspector) renderVisualInspector();
+    };
+
+    const refreshContentStudio = () => {
+      renderSectionList();
+      renderContentEditor();
+      renderVisualCanvas();
     };
 
     const renderNodeDetail = () => {
@@ -655,6 +1055,8 @@ const clusterData = JSON.stringify(adminTopicClusters);
       $('[data-sitemap]').checked = true;
       renderTasks(page);
       validateIndexing();
+      selectedSectionIndex = 0;
+      refreshContentStudio();
     };
 
     $$('[data-page-row], .page-pick').forEach((row) => {
@@ -678,6 +1080,94 @@ const clusterData = JSON.stringify(adminTopicClusters);
       document.getElementById('section-1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
+    $$('[data-format-block]').forEach((button) => {
+      button.addEventListener('click', () => {
+        $('[data-rich-editor]')?.focus();
+        document.execCommand('formatBlock', false, button.dataset.formatBlock);
+        syncSectionEditor();
+      });
+    });
+
+    $$('[data-rich-command]').forEach((button) => {
+      button.addEventListener('click', () => {
+        $('[data-rich-editor]')?.focus();
+        document.execCommand(button.dataset.richCommand, false, null);
+        syncSectionEditor();
+      });
+    });
+
+    $('[data-rich-link]')?.addEventListener('click', () => {
+      $('[data-rich-editor]')?.focus();
+      const href = window.prompt('リンクURLを入力してください', '/growth/');
+      if (!href) return;
+      document.execCommand('createLink', false, href);
+      syncSectionEditor();
+    });
+
+    $$('[data-section-title], [data-section-items], [data-section-image-src], [data-section-image-alt], [data-section-image-caption]').forEach((field) => {
+      field.addEventListener('input', syncSectionEditor);
+    });
+
+    $('[data-rich-editor]')?.addEventListener('input', syncSectionEditor);
+
+    $('[data-section-add]')?.addEventListener('click', () => {
+      syncSectionEditor();
+      const sections = getPageSections();
+      sections.splice(selectedSectionIndex + 1, 0, cloneSection({ title: '新しいセクション', body: 'ここに本文を入力します。' }));
+      selectedSectionIndex += 1;
+      refreshContentStudio();
+    });
+
+    $('[data-section-duplicate]')?.addEventListener('click', () => {
+      syncSectionEditor();
+      const sections = getPageSections();
+      sections.splice(selectedSectionIndex + 1, 0, cloneSection(selectedSection()));
+      selectedSectionIndex += 1;
+      refreshContentStudio();
+    });
+
+    $('[data-section-delete]')?.addEventListener('click', () => {
+      const sections = getPageSections();
+      if (sections.length <= 1) return;
+      sections.splice(selectedSectionIndex, 1);
+      selectedSectionIndex = Math.max(0, selectedSectionIndex - 1);
+      refreshContentStudio();
+    });
+
+    $('[data-section-up]')?.addEventListener('click', () => {
+      syncSectionEditor();
+      const sections = getPageSections();
+      if (selectedSectionIndex <= 0) return;
+      [sections[selectedSectionIndex - 1], sections[selectedSectionIndex]] = [sections[selectedSectionIndex], sections[selectedSectionIndex - 1]];
+      selectedSectionIndex -= 1;
+      refreshContentStudio();
+    });
+
+    $('[data-section-down]')?.addEventListener('click', () => {
+      syncSectionEditor();
+      const sections = getPageSections();
+      if (selectedSectionIndex >= sections.length - 1) return;
+      [sections[selectedSectionIndex + 1], sections[selectedSectionIndex]] = [sections[selectedSectionIndex], sections[selectedSectionIndex + 1]];
+      selectedSectionIndex += 1;
+      refreshContentStudio();
+    });
+
+    [
+      ['[data-visual-layout]', 'layout'],
+      ['[data-visual-tone]', 'tone'],
+      ['[data-visual-align]', 'align'],
+      ['[data-visual-heading-size]', 'headingSize'],
+      ['[data-visual-body-size]', 'bodySize'],
+    ].forEach(([selector, key]) => {
+      $(selector)?.addEventListener('change', (event) => {
+        const section = selectedSection();
+        section.visual = section.visual || {};
+        section.visual[key] = event.target.value;
+        renderVisualCanvas(false);
+        renderSectionList();
+      });
+    });
+
     $('[data-page-search]')?.addEventListener('input', (event) => {
       const query = event.target.value.toLowerCase();
       $$('[data-page-row]').forEach((row) => {
@@ -696,6 +1186,7 @@ const clusterData = JSON.stringify(adminTopicClusters);
     });
 
     $('[data-submit-proposal]')?.addEventListener('click', async () => {
+      syncSectionEditor();
       const status = $('[data-submit-status]');
       const button = $('[data-submit-proposal]');
       const payload = {
@@ -704,6 +1195,7 @@ const clusterData = JSON.stringify(adminTopicClusters);
         description: $('[data-field="description"]')?.value || selectedPage.description,
         primaryKeyword: $('[data-field="primaryKeyword"]')?.value || selectedPage.primaryKeyword,
         lede: $('[data-field="lede"]')?.value || selectedPage.lede,
+        sections: getPageSections(selectedPage).map(normalizeSectionForSave),
         indexStatus: $('[data-index-status]')?.value || 'index',
         canonical: $('[data-canonical]')?.value || '',
         sitemap: Boolean($('[data-sitemap]')?.checked),

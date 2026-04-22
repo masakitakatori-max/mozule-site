@@ -80,6 +80,12 @@ const ADMIN_MAX_LENGTHS = {
   indexStatus: 20,
   canonical: 240,
   notes: 1200,
+  sectionTitle: 120,
+  sectionBody: 4000,
+  sectionHtml: 9000,
+  imageSrc: 500,
+  imageAlt: 160,
+  imageCaption: 220,
 };
 
 const notifyCloudflareEmail = async (submission, env) => {
@@ -146,6 +152,88 @@ const notifyResend = async (submission, env) => {
 
 const adminNormalize = (value, limit) => String(value || '').trim().slice(0, limit);
 
+const escapeAttribute = (value) =>
+  String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+const sanitizeRichHtml = (value) => {
+  const allowedTags = new Set(['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'h2', 'h3', 'h4']);
+  const stripped = String(value || '')
+    .slice(0, ADMIN_MAX_LENGTHS.sectionHtml)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<\s*(script|style|iframe|object|embed|form|input|button|textarea|select)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
+    .replace(/<\s*(script|style|iframe|object|embed|form|input|button|textarea|select)[^>]*\/?\s*>/gi, '');
+
+  return stripped.replace(/<\/?([a-zA-Z0-9-]+)([^>]*)>/g, (match, tagName, attrs = '') => {
+    const tag = tagName.toLowerCase();
+    const closing = /^<\//.test(match);
+    if (!allowedTags.has(tag)) return '';
+    if (closing) return `</${tag}>`;
+    if (tag === 'br') return '<br>';
+    if (tag === 'a') {
+      const hrefMatch = attrs.match(/\shref\s*=\s*["']([^"']+)["']/i);
+      const href = hrefMatch ? hrefMatch[1].trim() : '';
+      const isSafeHref =
+        href.startsWith('/') || href.startsWith('#') || href.startsWith('https://') || href.startsWith('mailto:');
+      return isSafeHref ? `<a href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">` : '<a>';
+    }
+    return `<${tag}>`;
+  });
+};
+
+const sanitizeImageSrc = (value) => {
+  const src = adminNormalize(value, ADMIN_MAX_LENGTHS.imageSrc);
+  if (!src) return '';
+  if (src.startsWith('/') || src.startsWith('https://')) return src;
+  return '';
+};
+
+const sanitizeAdminSections = (sections) => {
+  if (!Array.isArray(sections)) return undefined;
+  return sections.slice(0, 12).map((section) => {
+    const title = adminNormalize(section?.title, ADMIN_MAX_LENGTHS.sectionTitle) || 'Untitled section';
+    const bodyHtml = sanitizeRichHtml(section?.bodyHtml);
+    const body = adminNormalize(section?.body, ADMIN_MAX_LENGTHS.sectionBody);
+    const items = Array.isArray(section?.items)
+      ? section.items.map((item) => adminNormalize(item, 180)).filter(Boolean).slice(0, 10)
+      : [];
+    const src = sanitizeImageSrc(section?.image?.src);
+    const image = src
+      ? {
+          src,
+          alt: adminNormalize(section?.image?.alt, ADMIN_MAX_LENGTHS.imageAlt) || title,
+          ...(adminNormalize(section?.image?.caption, ADMIN_MAX_LENGTHS.imageCaption)
+            ? { caption: adminNormalize(section?.image?.caption, ADMIN_MAX_LENGTHS.imageCaption) }
+            : {}),
+        }
+      : undefined;
+    const visual = section?.visual || {};
+    const layoutValues = new Set(['text', 'split-left', 'split-right', 'feature']);
+    const toneValues = new Set(['default', 'muted', 'accent', 'light']);
+    const alignValues = new Set(['left', 'center']);
+    const headingSizeValues = new Set(['md', 'lg', 'xl']);
+    const bodySizeValues = new Set(['sm', 'md', 'lg']);
+
+    return {
+      title,
+      body: body || bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      ...(bodyHtml ? { bodyHtml } : {}),
+      ...(items.length ? { items } : {}),
+      ...(image ? { image } : {}),
+      visual: {
+        layout: layoutValues.has(visual.layout) ? visual.layout : 'text',
+        tone: toneValues.has(visual.tone) ? visual.tone : 'default',
+        align: alignValues.has(visual.align) ? visual.align : 'left',
+        headingSize: headingSizeValues.has(visual.headingSize) ? visual.headingSize : 'lg',
+        bodySize: bodySizeValues.has(visual.bodySize) ? visual.bodySize : 'md',
+      },
+    };
+  });
+};
+
 const decodeBase64Utf8 = (encoded) => {
   const binary = atob(String(encoded || '').replace(/\s/g, ''));
   const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
@@ -201,6 +289,7 @@ const getAdminPayload = async (request) => {
     description: adminNormalize(values.description, ADMIN_MAX_LENGTHS.description),
     primaryKeyword: adminNormalize(values.primaryKeyword, ADMIN_MAX_LENGTHS.primaryKeyword),
     lede: adminNormalize(values.lede, ADMIN_MAX_LENGTHS.lede),
+    sections: sanitizeAdminSections(values.sections),
     indexStatus: adminNormalize(values.indexStatus, ADMIN_MAX_LENGTHS.indexStatus) || 'index',
     canonical: adminNormalize(values.canonical, ADMIN_MAX_LENGTHS.canonical),
     sitemap: Boolean(values.sitemap),
@@ -232,6 +321,7 @@ const buildGrowthOverride = (payload) => ({
   description: payload.description,
   primaryKeyword: payload.primaryKeyword,
   lede: payload.lede,
+  ...(payload.sections?.length ? { sections: payload.sections } : {}),
 });
 
 const githubJson = async (env, path, init = {}) => {

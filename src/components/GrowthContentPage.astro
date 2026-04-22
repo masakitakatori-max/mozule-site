@@ -62,6 +62,47 @@ const structuredData = [
   breadcrumbJson(breadcrumbs),
   faqJson(page.faq),
 ];
+
+const sectionShellClass = (section: GrowthPage['sections'][number]) => {
+  const visual = section.visual ?? {};
+  const layout = visual.layout ?? (section.image ? 'split-right' : 'text');
+  const tone = visual.tone ?? 'default';
+  const align = visual.align ?? 'left';
+  const toneClass =
+    tone === 'accent'
+      ? 'border-t-2 border-[#4DB6AC] bg-[#4DB6AC]/5 px-6 py-6'
+      : tone === 'light'
+        ? 'bg-white px-6 py-6 text-[#11151A]'
+        : tone === 'muted'
+          ? 'bg-[#0F1216] px-6 py-6'
+          : '';
+  const alignClass = align === 'center' ? 'text-center' : '';
+  const layoutClass =
+    section.image && layout !== 'text'
+      ? 'grid gap-6 md:grid-cols-2 md:items-center'
+      : layout === 'feature'
+        ? 'md:col-span-2 max-w-4xl'
+        : '';
+  return ['fade-up', toneClass, alignClass, layoutClass].filter(Boolean).join(' ');
+};
+
+const sectionHeadingClass = (section: GrowthPage['sections'][number]) => {
+  const size = section.visual?.headingSize ?? 'lg';
+  const tone = section.visual?.tone ?? 'default';
+  const color = tone === 'light' ? 'text-[#11151A]' : 'text-white';
+  const sizeClass = size === 'xl' ? 'text-3xl md:text-5xl' : size === 'md' ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl';
+  return [sizeClass, color, 'font-bold mb-5 leading-tight text-balance'].join(' ');
+};
+
+const sectionBodyClass = (section: GrowthPage['sections'][number]) => {
+  const size = section.visual?.bodySize ?? 'md';
+  const tone = section.visual?.tone ?? 'default';
+  const color = tone === 'light' ? 'text-[#263238]' : 'text-gray-400';
+  const sizeClass = size === 'lg' ? 'text-lg' : size === 'sm' ? 'text-sm' : 'text-base';
+  return ['growth-richtext', color, sizeClass, 'leading-relaxed'].join(' ');
+};
+
+const sectionImageFirst = (section: GrowthPage['sections'][number]) => section.image && section.visual?.layout === 'split-left';
 ---
 <Layout
   section="growth"
@@ -104,9 +145,20 @@ const structuredData = [
   <section class="py-20 px-6 border-y border-[#1E1E1E]">
     <div class="max-w-6xl mx-auto grid gap-12 md:grid-cols-2">
       {page.sections.map((section) => (
-        <article class="fade-up">
-          <h2 class="text-2xl md:text-3xl font-bold text-white mb-5">{section.title}</h2>
-          <p class="text-gray-400 leading-relaxed">{section.body}</p>
+        <article class={sectionShellClass(section)}>
+          {sectionImageFirst(section) && (
+            <figure>
+              <img src={section.image?.src} alt={section.image?.alt} class="aspect-[4/3] w-full object-cover" loading="lazy" />
+              {section.image?.caption && <figcaption class="mt-3 text-xs text-gray-500">{section.image.caption}</figcaption>}
+            </figure>
+          )}
+          <div>
+            <h2 class={sectionHeadingClass(section)}>{section.title}</h2>
+            {section.bodyHtml ? (
+              <div class={sectionBodyClass(section)} set:html={section.bodyHtml}></div>
+            ) : (
+              <p class={sectionBodyClass(section)}>{section.body}</p>
+            )}
           {section.items && (
             <ul class="mt-6 space-y-3">
               {section.items.map((item) => (
@@ -116,6 +168,13 @@ const structuredData = [
                 </li>
               ))}
             </ul>
+          )}
+          </div>
+          {section.image && !sectionImageFirst(section) && (
+            <figure>
+              <img src={section.image.src} alt={section.image.alt} class="aspect-[4/3] w-full object-cover" loading="lazy" />
+              {section.image.caption && <figcaption class="mt-3 text-xs text-gray-500">{section.image.caption}</figcaption>}
+            </figure>
           )}
         </article>
       ))}
@@ -187,3 +246,37 @@ const structuredData = [
   </section>
 </Layout>
 
+<style>
+  .growth-richtext :global(p + p) {
+    margin-top: 1rem;
+  }
+
+  .growth-richtext :global(strong),
+  .growth-richtext :global(b) {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .growth-richtext :global(a) {
+    color: #4db6ac;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .growth-richtext :global(ul),
+  .growth-richtext :global(ol) {
+    margin-top: 1rem;
+    padding-left: 1.25rem;
+  }
+
+  .growth-richtext :global(li + li) {
+    margin-top: 0.5rem;
+  }
+
+  .growth-richtext :global(blockquote) {
+    margin-top: 1.25rem;
+    border-left: 3px solid #4db6ac;
+    padding-left: 1rem;
+    color: #d1d5db;
+  }
+</style>

@@ -17,7 +17,20 @@ export type FaqItem = {
 export type ContentSection = {
   title: string;
   body: string;
+  bodyHtml?: string;
   items?: string[];
+  image?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  };
+  visual?: {
+    layout?: 'text' | 'split-left' | 'split-right' | 'feature';
+    tone?: 'default' | 'muted' | 'accent' | 'light';
+    align?: 'left' | 'center';
+    headingSize?: 'md' | 'lg' | 'xl';
+    bodySize?: 'sm' | 'md' | 'lg';
+  };
 };
 
 export type Comparison = {

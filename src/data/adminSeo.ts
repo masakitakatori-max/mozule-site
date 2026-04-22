@@ -31,6 +31,7 @@ export type AdminSeoPage = {
   faqCount: number;
   relatedCount: number;
   related: { label: string; href: string }[];
+  sections: GrowthPage['sections'];
   sectionCount: number;
   score: number;
   tasks: AdminSeoAction[];
@@ -234,6 +235,7 @@ export const adminSeoPages: AdminSeoPage[] = allGrowthPages.map((page) => ({
   faqCount: page.faq.length,
   relatedCount: page.related.length,
   related: page.related.map((link) => ({ label: link.label, href: link.href })),
+  sections: page.sections,
   sectionCount: page.sections.length,
   score: scorePage(page),
   tasks: pageTasks(page),
