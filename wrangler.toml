@@ -7,6 +7,10 @@ workers_dev = false
 pattern = "mozule.co.jp/*"
 zone_name = "mozule.co.jp"
 
+[[send_email]]
+name = "CONTACT_EMAIL"
+destination_address = "masaki.takatori@mozule.co.jp"
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"

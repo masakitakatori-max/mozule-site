@@ -1,3 +1,5 @@
+import { EmailMessage } from 'cloudflare:email';
+
 const MAX_LENGTHS = {
   name: 120,
   company: 160,
@@ -67,6 +69,45 @@ const submissionText = (submission) =>
     '',
     submission.message,
   ].join('\n');
+
+const sanitizeHeader = (value) => String(value || '').replace(/[\r\n]/g, ' ').trim();
+
+const encodeSubject = (subject) => {
+  const bytes = new TextEncoder().encode(subject);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return `=?UTF-8?B?${btoa(binary)}?=`;
+};
+
+const createEmailBody = (submission) => {
+  const text = submissionText(submission);
+  return [
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    `From: Mozule Contact <noreply@mozule.co.jp>`,
+    `To: masaki.takatori@mozule.co.jp`,
+    `Reply-To: ${sanitizeHeader(submission.email)}`,
+    `Subject: ${encodeSubject(`[Mozule] ${submission.topic} inquiry from ${submission.name}`)}`,
+    '',
+    text,
+  ].join('\r\n');
+};
+
+const notifyCloudflareEmail = async (submission, env) => {
+  if (!env.CONTACT_EMAIL) return false;
+
+  const message = new EmailMessage(
+    'noreply@mozule.co.jp',
+    'masaki.takatori@mozule.co.jp',
+    createEmailBody(submission)
+  );
+
+  await env.CONTACT_EMAIL.send(message);
+  return true;
+};
 
 const notifyWebhook = async (submission, env) => {
   if (!env.CONTACT_WEBHOOK_URL) return false;
@@ -143,10 +184,11 @@ const handleContact = async (request, env) => {
   if (error) return json({ ok: false, message: error }, 400);
 
   try {
+    const sentToCloudflareEmail = await notifyCloudflareEmail(submission, env);
     const sentToWebhook = await notifyWebhook(submission, env);
     const sentToResend = await notifyResend(submission, env);
 
-    if (!sentToWebhook && !sentToResend) {
+    if (!sentToCloudflareEmail && !sentToWebhook && !sentToResend) {
       return json({ ok: false, message: 'お問い合わせフォームの送信先が未設定です。' }, 503);
     }
 
