@@ -158,11 +158,23 @@ const handleContact = async (request, env) => {
   if (error) return json({ ok: false, message: error }, 400);
 
   try {
-    const sentToCloudflareEmail = await notifyCloudflareEmail(submission, env);
-    const sentToWebhook = await notifyWebhook(submission, env);
-    const sentToResend = await notifyResend(submission, env);
+    const results = await Promise.allSettled([
+      notifyCloudflareEmail(submission, env),
+      notifyWebhook(submission, env),
+      notifyResend(submission, env),
+    ]);
+    const sent = results.some((result) => result.status === 'fulfilled' && result.value);
+    const failures = results.filter((result) => result.status === 'rejected');
 
-    if (!sentToCloudflareEmail && !sentToWebhook && !sentToResend) {
+    failures.forEach((result) => {
+      console.error('Contact form notification failed', result.reason);
+    });
+
+    if (!sent && failures.length) {
+      return json({ ok: false, message: '送信に失敗しました。時間をおいて再度お試しください。' }, 502);
+    }
+
+    if (!sent) {
       return json({ ok: false, message: 'お問い合わせフォームの送信先が未設定です。' }, 503);
     }
 
