@@ -1,6 +1,11 @@
 name = "mozule-site"
 main = "src/worker.js"
 compatibility_date = "2024-01-01"
+workers_dev = false
+
+[[routes]]
+pattern = "mozule.co.jp"
+custom_domain = true
 
 [assets]
 directory = "./dist"
