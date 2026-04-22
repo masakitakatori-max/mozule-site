@@ -1,0 +1,18 @@
+---
+import GrowthContentPage from '../../../../components/GrowthContentPage.astro';
+import { learnArticles } from '../../../../data/growth';
+
+export function getStaticPaths() {
+  return learnArticles.map((page) => {
+    const [, , , cluster, slug] = page.path.split('/');
+    return {
+      params: { cluster, slug },
+      props: { page, cluster },
+    };
+  });
+}
+
+const { page, cluster } = Astro.props;
+---
+<GrowthContentPage page={page} parent={{ label: `Learn / ${cluster}`, href: `/growth/learn/${cluster}/` }} />
+

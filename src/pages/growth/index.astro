@@ -1,0 +1,130 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FaqList from '../../components/FaqList.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import {
+  breadcrumbJson,
+  faqJson,
+  growthSoftwareJson,
+  organizationJson,
+  growthHomeFaq,
+} from '../../data/growth';
+
+const structuredData = [
+  organizationJson,
+  growthSoftwareJson('/growth/'),
+  breadcrumbJson([
+    { label: 'Home', href: '/' },
+    { label: 'mozule growth', href: '/growth/' },
+  ]),
+  faqJson(growthHomeFaq),
+];
+---
+<Layout
+  section="growth"
+  title="mozule growth"
+  description="mozule growthは、SEO/AEOの機会検知から改善提案、GitHub PR、効果監視までを閉じるAIグロースエージェントです。"
+  canonicalPath="/growth/"
+  structuredData={structuredData}
+>
+  <section class="relative min-h-[calc(100svh-80px)] overflow-hidden px-6 flex items-center">
+    <div class="growth-grid absolute inset-0 opacity-70"></div>
+    <div class="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#4DB6AC]/10 to-transparent"></div>
+    <div class="max-w-6xl mx-auto relative z-10 w-full py-20">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-6 font-semibold">mozule growth</p>
+      <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-[0.98] tracking-tight text-white max-w-5xl text-balance">
+        4%の指示で、64点の実装を今日終わらせる。
+      </h1>
+      <p class="mt-8 max-w-2xl text-lg md:text-xl leading-relaxed text-gray-300">
+        SEO/AEOのSignalを見つけ、改善案を選び、GitHub PRとしてShipし、結果から次のLearnへ進むAIグロースエージェント。
+      </p>
+      <div class="mt-10 flex flex-col sm:flex-row gap-4">
+        <a href="#contact" class="inline-flex items-center justify-center rounded-lg bg-[#4DB6AC] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#00897B] hover:-translate-y-0.5">
+          4%の労力でグロースループを相談
+        </a>
+        <a href="/growth/sample-report/" class="inline-flex items-center justify-center rounded-lg border border-[#2A2A2A] px-7 py-4 text-sm font-semibold text-gray-200 transition hover:border-[#4DB6AC] hover:text-white">
+          サンプルレポートを見る
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 px-6 border-y border-[#1E1E1E]">
+    <div class="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+      <div class="fade-up">
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Problem</p>
+        <h2 class="text-4xl md:text-5xl font-bold leading-tight text-white text-balance">CxOが手を動かす組織は、スケールしない。</h2>
+      </div>
+      <div class="grid gap-8 md:grid-cols-3">
+        <div class="fade-up border-t border-[#4DB6AC] pt-5">
+          <h3 class="text-lg font-bold text-white mb-3">手動ボトルネック</h3>
+          <p class="text-sm leading-relaxed text-gray-400">LP修正、SEO調査、タグ設定がFounder/CTOの手元で止まる。</p>
+        </div>
+        <div class="fade-up border-t border-[#4DB6AC] pt-5">
+          <h3 class="text-lg font-bold text-white mb-3">完璧主義の遅れ</h3>
+          <p class="text-sm leading-relaxed text-gray-400">100点を待つほど、PMF検証の打席数が失われる。</p>
+        </div>
+        <div class="fade-up border-t border-[#4DB6AC] pt-5">
+          <h3 class="text-lg font-bold text-white mb-3">やりっぱなし負債</h3>
+          <p class="text-sm leading-relaxed text-gray-400">公開後のLearnとPivotに手が回らず、施策が積み上がらない。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Loop</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-12">SignalからShip、Learnまで</h2>
+      <div class="grid gap-6 md:grid-cols-4">
+        {[
+          ['Signal', 'GSC、GA4、AI Visibilityから改善機会を検知する。'],
+          ['Decide', 'AIが施策案、影響、リスクを整理し、人間が承認する。'],
+          ['Ship', 'MCP/GitHub連携で、改善をPRとして実装する。'],
+          ['Learn', '公開後の数値を見て、戻すか伸ばすかを判断する。'],
+        ].map(([label, body], index) => (
+          <div class="fade-up rounded-lg border border-[#1E1E1E] p-6 transition hover:border-[#4DB6AC]">
+            <p class="text-xs tracking-widest uppercase text-gray-500 mb-5">{String(index + 1).padStart(2, '0')}</p>
+            <h3 class="text-xl font-bold text-white mb-4">{label}</h3>
+            <p class="text-sm leading-relaxed text-gray-400">{body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 px-6 bg-[#070707] border-y border-[#1E1E1E]">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Entry points</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-12">検索意図別の入口</h2>
+      <div class="grid gap-4 md:grid-cols-3">
+        {[
+          ['/growth/seo-automation/', 'SEO自動化', 'GSC分析、内部リンク、構造化データ、PR化まで。'],
+          ['/growth/aeo/', 'AEO対策', 'AI OverviewとLLM回答に引用されやすい構造へ。'],
+          ['/growth/mcp-github/', 'MCP/GitHub', 'CTOが確認できるPR単位の安全な実装。'],
+          ['/growth/startup-seo/', 'スタートアップSEO', '採用前にSEOの受け皿と検証サイクルを作る。'],
+          ['/growth/gsc-automation/', 'GSC改善', '表示回数、CTR、順位から改善優先順位を抽出。'],
+          ['/growth/lp-optimization-ai/', 'LP改善AI', '64点の訴求をすばやくShipしてLearnする。'],
+        ].map(([href, title, body]) => (
+          <a href={href} class="group rounded-lg border border-[#1E1E1E] p-6 transition hover:border-[#4DB6AC] hover:-translate-y-0.5">
+            <h3 class="text-xl font-bold text-white group-hover:text-[#4DB6AC] transition">{title}</h3>
+            <p class="mt-4 text-sm leading-relaxed text-gray-400">{body}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <FaqList faqs={growthHomeFaq} />
+
+  <section id="contact" class="py-24 px-6 border-t border-[#1E1E1E]">
+    <div class="max-w-4xl mx-auto text-center fade-up">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Design Partner</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">最初の改善PRから始める。</h2>
+      <p class="text-gray-400 leading-relaxed mb-10">
+        GSC/GA4をもとにしたSignal診断、GitHub連携PoC、AI Visibility診断から、貴社の検証ループを設計します。
+      </p>
+      <ContactForm context="growth" submitLabel="mozule growthについて相談する" />
+    </div>
+  </section>
+</Layout>

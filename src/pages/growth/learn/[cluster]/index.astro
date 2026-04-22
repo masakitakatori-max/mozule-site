@@ -1,0 +1,45 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
+import { breadcrumbJson, learnArticles, organizationJson, growthSoftwareJson, learnClusterLabels } from '../../../../data/growth';
+
+export function getStaticPaths() {
+  return Object.keys(learnClusterLabels).map((cluster) => ({
+    params: { cluster },
+    props: { cluster },
+  }));
+}
+
+const { cluster } = Astro.props;
+const label = learnClusterLabels[cluster] ?? cluster;
+const pages = learnArticles.filter((page) => page.path.includes(`/learn/${cluster}/`));
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'mozule growth', href: '/growth/' },
+  { label: 'Learn', href: '/growth/learn/' },
+  { label, href: `/growth/learn/${cluster}/` },
+];
+---
+<Layout
+  section="growth"
+  title={label}
+  description={`${label}に関するmozule growthのナレッジ記事一覧です。`}
+  canonicalPath={`/growth/learn/${cluster}/`}
+  structuredData={[organizationJson, growthSoftwareJson('/growth/'), breadcrumbJson(breadcrumbs)]}
+>
+  <Breadcrumbs items={breadcrumbs} />
+  <section class="px-6 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Learn</p>
+      <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-7">{label}</h1>
+      <div class="grid gap-4 md:grid-cols-2">
+        {pages.map((page) => (
+          <a href={page.path} class="rounded-lg border border-[#1E1E1E] p-6 transition hover:border-[#4DB6AC] hover:-translate-y-0.5">
+            <h2 class="text-xl font-bold text-white mb-3">{page.h1}</h2>
+            <p class="text-sm text-gray-400 leading-relaxed">{page.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,41 @@
+/growth/solution/*
+  X-Robots-Tag: noindex, nofollow
+
+/preview/*
+  X-Robots-Tag: noindex, nofollow
+
+/search/*
+  X-Robots-Tag: noindex, nofollow
+
+/tags/*
+  X-Robots-Tag: noindex, nofollow
+
+/demo/thanks/*
+  X-Robots-Tag: noindex, nofollow
+
+/thanks/*
+  X-Robots-Tag: noindex, nofollow
+
+/test/*
+  X-Robots-Tag: noindex, nofollow
+
+/tests/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/preview/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/search/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/demo/thanks/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/lp/thanks/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/test/*
+  X-Robots-Tag: noindex, nofollow
+
+/growth/tests/*
+  X-Robots-Tag: noindex, nofollow

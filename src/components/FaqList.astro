@@ -1,0 +1,27 @@
+---
+import type { FaqItem } from '../data/growth';
+
+interface Props {
+  faqs: FaqItem[];
+}
+
+const { faqs } = Astro.props;
+---
+<section class="py-20 px-6">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">FAQ</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-10">よくある質問</h2>
+    <div class="divide-y divide-[#1E1E1E] border-y border-[#1E1E1E]">
+      {faqs.map((faq) => (
+        <details class="group py-6">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold text-white">
+            <span>{faq.question}</span>
+            <span class="text-[#4DB6AC] transition group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-4 text-sm leading-relaxed text-gray-400">{faq.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+

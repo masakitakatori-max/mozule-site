@@ -1,0 +1,38 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import { breadcrumbJson, comparePages, organizationJson, growthSoftwareJson } from '../../../data/growth';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'mozule growth', href: '/growth/' },
+  { label: 'Compare', href: '/growth/compare/' },
+];
+---
+<Layout
+  section="growth"
+  title="比較記事"
+  description="AI SEOツール、AEOツール、SEO自動化ツールを、分析、実装、検証、GitHub連携の観点で比較します。"
+  canonicalPath="/growth/compare/"
+  structuredData={[organizationJson, growthSoftwareJson('/growth/'), breadcrumbJson(breadcrumbs)]}
+>
+  <Breadcrumbs items={breadcrumbs} />
+  <section class="px-6 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Compare</p>
+      <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-7">比較記事</h1>
+      <p class="max-w-2xl text-gray-400 leading-relaxed mb-12">
+        Buy意図の強い検索に対して、記事生成だけではなく、分析、実装、AEO、検証まで含めて比較します。
+      </p>
+      <div class="grid gap-4 md:grid-cols-3">
+        {comparePages.map((page) => (
+          <a href={page.path} class="rounded-lg border border-[#1E1E1E] p-6 transition hover:border-[#4DB6AC] hover:-translate-y-0.5">
+            <h2 class="text-xl font-bold text-white mb-3">{page.h1}</h2>
+            <p class="text-sm text-gray-400 leading-relaxed">{page.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+

@@ -1,0 +1,15 @@
+---
+import GrowthContentPage from '../../components/GrowthContentPage.astro';
+import { growthPages } from '../../data/growth';
+
+export function getStaticPaths() {
+  return growthPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+---
+<GrowthContentPage page={page} />
+

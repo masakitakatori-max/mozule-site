@@ -3,36 +3,84 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  canonicalPath?: string;
+  robots?: string;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
+  section?: 'corporate' | 'growth';
+  ogType?: string;
 }
 const {
   title = '株式会社Mozule',
   description = '関わるすべての人が発信源となり、喜びが循環する仕組みを作る。新規事業開発支援、AIシステムの開発支援、マーケティング/営業支援。',
+  canonicalPath,
+  robots = 'index, follow',
+  structuredData = [],
+  section = 'corporate',
+  ogType = 'website',
 } = Astro.props;
 const pageTitle = title === '株式会社Mozule' ? title : `${title} | 株式会社Mozule`;
+const siteUrl = 'https://mozule.co.jp';
+const normalizePath = (path: string) => {
+  const withoutQuery = path.split('?')[0] || '/';
+  const withLeadingSlash = withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`;
+  return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`;
+};
+const canonicalUrl = new URL(normalizePath(canonicalPath ?? Astro.url.pathname), siteUrl).toString();
+const structuredDataItems = Array.isArray(structuredData) ? structuredData : [structuredData];
+const isGrowth = section === 'growth';
 ---
 <!doctype html>
 <html lang="ja" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content={robots} />
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:site_name" content="株式会社Mozule" />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={pageTitle} />
+  <meta name="twitter:description" content={description} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  {structuredDataItems.map((item) => (
+    <script type="application/ld+json" set:html={JSON.stringify(item)}></script>
+  ))}
 </head>
 <body class="min-h-full flex flex-col font-sans antialiased">
   <header class="sticky top-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-md border-b border-white/5">
-    <nav class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="text-lg font-bold text-white hover:opacity-80 transition">Mozule</a>
+    <nav class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href={isGrowth ? '/growth/' : '/'} class="text-lg font-bold text-white hover:opacity-80 transition">
+        {isGrowth ? 'mozule growth' : 'Mozule'}
+      </a>
       <div class="hidden md:flex items-center gap-8">
-        <a href="/about" class="text-sm text-gray-400 hover:text-white transition">会社概要</a>
-        <a href="/services" class="text-sm text-gray-400 hover:text-white transition">事業内容</a>
-        <a href="/news" class="text-sm text-gray-400 hover:text-white transition">ニュース</a>
-        <a href="/#contact" class="text-sm bg-[#4DB6AC] hover:bg-[#00897B] text-white font-semibold px-4 py-2 rounded-lg transition">
-          お問い合わせ
-        </a>
+        {isGrowth ? (
+          <>
+            <a href="/growth/seo-automation/" class="text-sm text-gray-400 hover:text-white transition">SEO自動化</a>
+            <a href="/growth/aeo/" class="text-sm text-gray-400 hover:text-white transition">AEO</a>
+            <a href="/growth/mcp-github/" class="text-sm text-gray-400 hover:text-white transition">MCP/GitHub</a>
+            <a href="/growth/sample-report/" class="text-sm text-gray-400 hover:text-white transition">診断サンプル</a>
+            <a href="/growth/#contact" class="text-sm bg-[#4DB6AC] hover:bg-[#00897B] text-white font-semibold px-4 py-2 rounded-lg transition">
+              デモを相談
+            </a>
+          </>
+        ) : (
+          <>
+            <a href="/about/" class="text-sm text-gray-400 hover:text-white transition">会社概要</a>
+            <a href="/services/" class="text-sm text-gray-400 hover:text-white transition">事業内容</a>
+            <a href="/news/" class="text-sm text-gray-400 hover:text-white transition">ニュース</a>
+            <a href="/growth/" class="text-sm text-gray-400 hover:text-white transition">mozule growth</a>
+            <a href="/#contact" class="text-sm bg-[#4DB6AC] hover:bg-[#00897B] text-white font-semibold px-4 py-2 rounded-lg transition">
+              お問い合わせ
+            </a>
+          </>
+        )}
       </div>
     </nav>
   </header>
@@ -42,13 +90,24 @@ const pageTitle = title === '株式会社Mozule' ? title : `${title} | 株式会
   </main>
 
   <footer class="border-t border-[#1E1E1E] py-10 px-6">
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <p class="text-sm font-bold text-white">Mozule</p>
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm font-bold text-white">{isGrowth ? 'mozule growth' : 'Mozule'}</p>
       <div class="flex items-center gap-6">
-        <a href="/about" class="text-xs text-gray-500 hover:text-gray-300 transition">会社概要</a>
-        <a href="/services" class="text-xs text-gray-500 hover:text-gray-300 transition">事業内容</a>
-        <a href="/news" class="text-xs text-gray-500 hover:text-gray-300 transition">ニュース</a>
-        <a href="/growth/solution/" class="text-xs text-gray-500 hover:text-gray-300 transition">mozule growth</a>
+        {isGrowth ? (
+          <>
+            <a href="/" class="text-xs text-gray-500 hover:text-gray-300 transition">Mozule</a>
+            <a href="/growth/seo-automation/" class="text-xs text-gray-500 hover:text-gray-300 transition">SEO自動化</a>
+            <a href="/growth/aeo/" class="text-xs text-gray-500 hover:text-gray-300 transition">AEO</a>
+            <a href="/growth/security/" class="text-xs text-gray-500 hover:text-gray-300 transition">セキュリティ</a>
+          </>
+        ) : (
+          <>
+            <a href="/about/" class="text-xs text-gray-500 hover:text-gray-300 transition">会社概要</a>
+            <a href="/services/" class="text-xs text-gray-500 hover:text-gray-300 transition">事業内容</a>
+            <a href="/news/" class="text-xs text-gray-500 hover:text-gray-300 transition">ニュース</a>
+            <a href="/growth/" class="text-xs text-gray-500 hover:text-gray-300 transition">mozule growth</a>
+          </>
+        )}
       </div>
       <p class="text-xs text-gray-600">&copy; 2026 株式会社Mozule</p>
     </div>

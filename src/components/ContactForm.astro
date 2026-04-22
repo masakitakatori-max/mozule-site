@@ -1,0 +1,116 @@
+---
+interface Props {
+  context?: string;
+  submitLabel?: string;
+}
+
+const { context = 'general', submitLabel = 'フォームを送信する' } = Astro.props;
+const inputClass =
+  'w-full rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-[#4DB6AC]';
+---
+<form
+  class="contact-form text-left"
+  action="/api/contact"
+  method="post"
+  data-contact-form
+>
+  <input type="hidden" name="context" value={context} />
+  <label class="hidden" aria-hidden="true">
+    Website
+    <input type="text" name="website" tabindex="-1" autocomplete="off" />
+  </label>
+
+  <div class="grid gap-5 md:grid-cols-2">
+    <label class="block">
+      <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">NAME</span>
+      <input class={inputClass} name="name" autocomplete="name" required placeholder="お名前" />
+    </label>
+    <label class="block">
+      <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">COMPANY</span>
+      <input class={inputClass} name="company" autocomplete="organization" placeholder="会社名" />
+    </label>
+    <label class="block">
+      <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">EMAIL</span>
+      <input class={inputClass} type="email" name="email" autocomplete="email" required placeholder="name@example.com" />
+    </label>
+    <label class="block">
+      <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">TOPIC</span>
+      <select class={inputClass} name="topic" required>
+        <option value="">選択してください</option>
+        <option value="mozule growth">mozule growth</option>
+        <option value="SEO/AEO">SEO/AEO</option>
+        <option value="AI/MCP/GitHub">AI/MCP/GitHub</option>
+        <option value="Corporate">会社・事業について</option>
+        <option value="Other">その他</option>
+      </select>
+    </label>
+  </div>
+
+  <label class="mt-5 block">
+    <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">URL</span>
+    <input class={inputClass} type="url" name="targetUrl" placeholder="https://example.com" />
+  </label>
+
+  <label class="mt-5 block">
+    <span class="mb-2 block text-xs font-semibold tracking-widest text-gray-500">MESSAGE</span>
+    <textarea
+      class={`${inputClass} min-h-36 resize-y`}
+      name="message"
+      required
+      placeholder="相談したい内容を記入してください"
+    ></textarea>
+  </label>
+
+  <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center rounded-lg bg-[#4DB6AC] px-8 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#00897B] disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {submitLabel}
+    </button>
+    <p class="text-sm text-gray-500" data-contact-status aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  document.querySelectorAll('[data-contact-form]').forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLFormElement)) return;
+
+      const status = target.querySelector('[data-contact-status]');
+      const button = target.querySelector('button[type="submit"]');
+      const setStatus = (message, isError = false) => {
+        if (!status) return;
+        status.textContent = message;
+        status.classList.toggle('text-red-300', isError);
+        status.classList.toggle('text-gray-500', !isError);
+      };
+
+      if (button instanceof HTMLButtonElement) button.disabled = true;
+      setStatus('送信中です。');
+
+      try {
+        const response = await fetch(target.action, {
+          method: 'POST',
+          body: new FormData(target),
+          headers: { Accept: 'application/json' },
+        });
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result.message || '送信できませんでした。');
+        }
+
+        target.reset();
+        setStatus('送信しました。確認後にご連絡します。');
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : '送信できませんでした。', true);
+      } finally {
+        if (button instanceof HTMLButtonElement) button.disabled = false;
+      }
+    });
+  });
+</script>

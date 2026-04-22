@@ -3,6 +3,18 @@
 html {
   background-color: #0A0A0A;
   color: #f9fafb;
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(77, 182, 172, 0.04), transparent 460px),
+    #0A0A0A;
+}
+
+:focus-visible {
+  outline: 2px solid #4DB6AC;
+  outline-offset: 4px;
 }
 
 .fade-up {
@@ -14,4 +26,16 @@ html {
 .fade-up.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.growth-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.text-balance {
+  text-wrap: balance;
 }

@@ -1,0 +1,24 @@
+---
+import type { LinkItem } from '../data/growth';
+
+interface Props {
+  items: LinkItem[];
+}
+
+const { items } = Astro.props;
+---
+<nav aria-label="Breadcrumb" class="px-6 pt-8">
+  <ol class="max-w-6xl mx-auto flex flex-wrap items-center gap-2 text-xs text-gray-500">
+    {items.map((item, index) => (
+      <li class="flex items-center gap-2">
+        {index > 0 && <span class="text-gray-700">/</span>}
+        {index < items.length - 1 ? (
+          <a href={item.href} class="hover:text-[#4DB6AC] transition">{item.label}</a>
+        ) : (
+          <span class="text-gray-300">{item.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+

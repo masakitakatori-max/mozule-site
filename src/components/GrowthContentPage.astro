@@ -1,0 +1,189 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import FaqList from './FaqList.astro';
+import {
+  absoluteUrl,
+  breadcrumbJson,
+  faqJson,
+  growthSoftwareJson,
+  organizationJson,
+  type GrowthPage,
+  type LinkItem,
+} from '../data/growth';
+
+interface Props {
+  page: GrowthPage;
+  parent?: LinkItem;
+}
+
+const { page, parent } = Astro.props;
+const breadcrumbs: LinkItem[] = [
+  { label: 'Home', href: '/' },
+  { label: 'mozule growth', href: '/growth/' },
+  ...(parent ? [parent] : []),
+  { label: page.h1, href: page.path },
+];
+const pageSchema =
+  page.schemaType === 'Article'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: page.h1,
+        description: page.description,
+        inLanguage: 'ja-JP',
+        mainEntityOfPage: absoluteUrl(page.path),
+        author: {
+          '@type': 'Person',
+          name: '高取將來',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: '株式会社Mozule',
+          url: absoluteUrl('/'),
+        },
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': page.schemaType,
+        name: page.h1,
+        description: page.description,
+        url: absoluteUrl(page.path),
+        provider: {
+          '@type': 'Organization',
+          name: '株式会社Mozule',
+          url: absoluteUrl('/'),
+        },
+      };
+const structuredData = [
+  organizationJson,
+  growthSoftwareJson('/growth/'),
+  pageSchema,
+  breadcrumbJson(breadcrumbs),
+  faqJson(page.faq),
+];
+---
+<Layout
+  section="growth"
+  title={page.title}
+  description={page.description}
+  canonicalPath={page.path}
+  structuredData={structuredData}
+  ogType={page.schemaType === 'Article' ? 'article' : 'website'}
+>
+  <Breadcrumbs items={breadcrumbs} />
+
+  <section class="relative overflow-hidden px-6 py-20 md:py-28">
+    <div class="growth-grid absolute inset-0 opacity-60"></div>
+    <div class="max-w-6xl mx-auto relative z-10 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+      <div>
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-5 font-medium">{page.eyebrow}</p>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight text-balance text-white mb-7">{page.h1}</h1>
+        <p class="max-w-2xl text-lg leading-relaxed text-gray-300">{page.lede}</p>
+        <div class="mt-9 flex flex-col sm:flex-row gap-4">
+          <a href={page.ctaHref} class="inline-flex items-center justify-center rounded-lg bg-[#4DB6AC] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#00897B] hover:-translate-y-0.5">
+            {page.ctaLabel}
+          </a>
+          <a href="/growth/sample-report/" class="inline-flex items-center justify-center rounded-lg border border-[#2A2A2A] px-6 py-4 text-sm font-semibold text-gray-200 transition hover:border-[#4DB6AC] hover:text-white">
+            サンプルレポートを見る
+          </a>
+        </div>
+      </div>
+      <div class="border-l border-[#1E1E1E] pl-6 lg:pl-10">
+        <p class="text-xs tracking-widest uppercase text-gray-500 mb-4">Primary keyword</p>
+        <p class="text-2xl font-bold text-white mb-8">{page.primaryKeyword}</p>
+        <div class="space-y-4 text-sm text-gray-400">
+          <p>対象: Founder / CTO / 初期グロース担当</p>
+          <p>導線: Signal診断、GitHub連携PoC、AI Visibility診断</p>
+          <p>役割: 検索意図を受け、導入判断へ進める正規ページ</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6 border-y border-[#1E1E1E]">
+    <div class="max-w-6xl mx-auto grid gap-12 md:grid-cols-2">
+      {page.sections.map((section) => (
+        <article class="fade-up">
+          <h2 class="text-2xl md:text-3xl font-bold text-white mb-5">{section.title}</h2>
+          <p class="text-gray-400 leading-relaxed">{section.body}</p>
+          {section.items && (
+            <ul class="mt-6 space-y-3">
+              {section.items.map((item) => (
+                <li class="flex gap-3 text-sm text-gray-300">
+                  <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#4DB6AC]"></span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  {page.comparison && (
+    <section class="py-20 px-6">
+      <div class="max-w-6xl mx-auto">
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Comparison</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-10">{page.comparison.title}</h2>
+        <div class="overflow-x-auto border border-[#1E1E1E] rounded-lg">
+          <table class="w-full min-w-[720px] border-collapse text-left text-sm">
+            <thead class="bg-[#0F0F0F] text-gray-300">
+              <tr>
+                {page.comparison.headers.map((header) => (
+                  <th class="border-b border-[#1E1E1E] px-5 py-4 font-semibold">{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#1E1E1E]">
+              {page.comparison.rows.map((row) => (
+                <tr class="transition hover:bg-[#0F0F0F]">
+                  {row.map((cell) => (
+                    <td class="px-5 py-4 text-gray-400">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {page.workflow && (
+    <section class="py-20 px-6 bg-[#070707]">
+      <div class="max-w-5xl mx-auto">
+        <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Workflow</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-12">SignalからLearnまで閉じる</h2>
+        <div class="grid gap-6 md:grid-cols-4">
+          {page.workflow.map((step, index) => (
+            <div class="fade-up border-t border-[#4DB6AC] pt-5">
+              <p class="text-xs tracking-widest uppercase text-gray-500 mb-3">{String(index + 1).padStart(2, '0')} / {step.label}</p>
+              <h3 class="text-lg font-bold text-white mb-3">{step.title}</h3>
+              <p class="text-sm leading-relaxed text-gray-400">{step.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <FaqList faqs={page.faq} />
+
+  <section class="py-20 px-6 border-t border-[#1E1E1E]">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-sm tracking-widest uppercase text-[#4DB6AC] mb-4 font-medium">Next</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-10">関連ページ</h2>
+      <div class="grid gap-4 md:grid-cols-3">
+        {page.related.map((link) => (
+          <a href={link.href} class="group rounded-lg border border-[#1E1E1E] p-6 transition hover:border-[#4DB6AC] hover:-translate-y-0.5">
+            <span class="text-lg font-bold text-white group-hover:text-[#4DB6AC] transition">{link.label}</span>
+            {link.description && <p class="mt-3 text-sm text-gray-400">{link.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+
