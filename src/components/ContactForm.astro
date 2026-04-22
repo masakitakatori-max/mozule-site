@@ -93,10 +93,17 @@ const inputClass =
       setStatus('送信中です。');
 
       try {
+        const formData = new FormData(target);
+        const body = new URLSearchParams();
+        formData.forEach((value, key) => body.append(key, String(value)));
+
         const response = await fetch(target.action, {
           method: 'POST',
-          body: new FormData(target),
-          headers: { Accept: 'application/json' },
+          body,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         });
         const result = await response.json().catch(() => ({}));
 
