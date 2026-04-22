@@ -1,3 +1,5 @@
+import growthOverridesData from './growthOverrides.json';
+
 export const SITE_URL = 'https://mozule.co.jp';
 export const GROWTH_ROOT = '/growth/';
 
@@ -49,7 +51,40 @@ export type GrowthPage = {
   related: LinkItem[];
 };
 
+type GrowthPageOverride = Partial<
+  Pick<
+    GrowthPage,
+    | 'title'
+    | 'description'
+    | 'eyebrow'
+    | 'h1'
+    | 'lede'
+    | 'primaryKeyword'
+    | 'ctaLabel'
+    | 'ctaHref'
+    | 'schemaType'
+    | 'sections'
+    | 'comparison'
+    | 'workflow'
+    | 'faq'
+    | 'related'
+  >
+>;
+
+type GrowthOverrides = {
+  pages?: Record<string, GrowthPageOverride>;
+};
+
 export const absoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
+
+const growthOverrides = growthOverridesData as GrowthOverrides;
+
+const applyGrowthOverride = (page: GrowthPage): GrowthPage => {
+  const override = growthOverrides.pages?.[page.path] ?? growthOverrides.pages?.[page.slug];
+  return override ? { ...page, ...override } : page;
+};
+
+const applyGrowthOverrides = (pages: GrowthPage[]): GrowthPage[] => pages.map(applyGrowthOverride);
 
 export const organizationJson = {
   '@context': 'https://schema.org',
@@ -153,7 +188,7 @@ export const growthHomeFaq: FaqItem[] = [
   },
 ];
 
-export const commercialPages: GrowthPage[] = [
+const commercialPagesBase: GrowthPage[] = [
   {
     slug: 'seo-automation',
     path: '/growth/seo-automation/',
@@ -524,7 +559,7 @@ export const commercialPages: GrowthPage[] = [
   },
 ];
 
-export const supportPages: GrowthPage[] = [
+const supportPagesBase: GrowthPage[] = [
   {
     slug: 'sample-report',
     path: '/growth/sample-report/',
@@ -760,9 +795,11 @@ export const supportPages: GrowthPage[] = [
   },
 ];
 
+export const commercialPages = applyGrowthOverrides(commercialPagesBase);
+export const supportPages = applyGrowthOverrides(supportPagesBase);
 export const growthPages = [...commercialPages, ...supportPages];
 
-export const integrationOverview: GrowthPage = {
+const integrationOverviewBase: GrowthPage = {
   slug: 'integrations',
   path: '/growth/integrations/',
   title: 'mozule growth連携',
@@ -805,7 +842,9 @@ export const integrationOverview: GrowthPage = {
   ],
 };
 
-export const integrationPages: GrowthPage[] = [
+export const integrationOverview = applyGrowthOverride(integrationOverviewBase);
+
+const integrationPagesBase: GrowthPage[] = [
   {
     slug: 'github',
     path: '/growth/integrations/github/',
@@ -992,7 +1031,9 @@ export const integrationPages: GrowthPage[] = [
   },
 ];
 
-export const comparePages: GrowthPage[] = [
+export const integrationPages = applyGrowthOverrides(integrationPagesBase);
+
+const comparePagesBase: GrowthPage[] = [
   {
     slug: 'ai-seo-tools',
     path: '/growth/compare/ai-seo-tools/',
@@ -1147,7 +1188,9 @@ export const comparePages: GrowthPage[] = [
   },
 ];
 
-export const learnArticles: GrowthPage[] = [
+export const comparePages = applyGrowthOverrides(comparePagesBase);
+
+const learnArticlesBase: GrowthPage[] = [
   {
     slug: 'what-is-aeo',
     path: '/growth/learn/aeo/what-is-aeo/',
@@ -1611,6 +1654,8 @@ export const learnArticles: GrowthPage[] = [
     ],
   },
 ];
+
+export const learnArticles = applyGrowthOverrides(learnArticlesBase);
 
 export const allGrowthPages = [
   ...growthPages,

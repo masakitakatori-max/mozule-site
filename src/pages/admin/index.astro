@@ -1,0 +1,493 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { adminSeoPages, adminSeoSummary, seoActionLibrary } from '../../data/adminSeo';
+
+const focusPages = adminSeoPages
+  .map((page, index) => ({ page, index }))
+  .sort((a, b) => a.page.score - b.page.score)
+  .slice(0, 8);
+const adminData = JSON.stringify(adminSeoPages);
+---
+<AdminLayout title="SEO Control Room">
+  <script id="admin-seo-data" type="application/json" set:html={adminData}></script>
+
+  <div class="min-h-screen">
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-[#0B0D10]/90 backdrop-blur-xl">
+      <div class="mx-auto flex h-16 max-w-[1480px] items-center justify-between px-5">
+        <div class="flex items-center gap-4">
+          <a href="/growth/" class="text-sm font-bold tracking-tight text-white">mozule growth</a>
+          <span class="h-5 w-px bg-white/10"></span>
+          <p class="text-sm font-semibold text-gray-300">SEO Control Room</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="hidden rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-200 md:inline-flex">Cloudflare Accessで保護推奨</span>
+          <button type="button" class="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-gray-200 transition hover:border-[#4DB6AC] hover:text-white" data-copy-plan>
+            <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4 fill-current"><path d="M5 2a2 2 0 0 0-2 2v10h2V4h9V2H5Zm4 4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H9Zm0 2h6v8H9V8Z"/></svg>
+            変更案をコピー
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="mx-auto grid max-w-[1480px] grid-cols-1 gap-0 lg:grid-cols-[248px_minmax(0,1fr)]">
+      <aside class="border-b border-white/10 bg-[#0F1216] px-5 py-5 lg:min-h-[calc(100vh-64px)] lg:border-b-0 lg:border-r">
+        <nav class="space-y-1" aria-label="Admin sections">
+          {[
+            ['Dashboard', '今日の改善'],
+            ['Pages', 'ページ別SEO'],
+            ['Opportunities', '改善候補'],
+            ['Internal Links', '内部リンク'],
+            ['Schema', '構造化データ'],
+            ['Indexing', '公開制御'],
+          ].map(([label, meta], index) => (
+            <a href={`#section-${index}`} class={`flex items-center justify-between rounded-md px-3 py-3 text-sm transition ${index === 0 ? 'bg-[#4DB6AC]/15 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+              <span class="font-semibold">{label}</span>
+              <span class="text-xs text-gray-500">{meta}</span>
+            </a>
+          ))}
+        </nav>
+
+        <div class="mt-8 border-t border-white/10 pt-6">
+          <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Safety</p>
+          <div class="mt-4 space-y-3 text-sm text-gray-400">
+            <p class="flex gap-2"><span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#4DB6AC]"></span>noindexページはsitemapから除外</p>
+            <p class="flex gap-2"><span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-amber-400"></span>canonicalとnoindexの併用を警告</p>
+            <p class="flex gap-2"><span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-sky-400"></span>公開前にPR差分を確認</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="min-w-0 px-5 py-6 md:px-8">
+        <section id="section-0" class="grid gap-5 xl:grid-cols-[1fr_360px]">
+          <div class="rounded-lg border border-white/10 bg-[#11151A] p-5">
+            <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Manual SEO workspace</p>
+                <h1 class="mt-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl">専門家のSEO判断を、非エンジニアの操作に落とす</h1>
+                <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-400">ページを選ぶと、KW/THP、AIO、E-E-A-T、内部リンク、構造化データ、index制御の改善カードだけが出ます。公開書き換えAPIは未接続なので、まずはPR前提の安全な作業台です。</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 md:w-[520px]">
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-xs text-gray-500">Pages</p>
+                  <p class="mt-1 text-2xl font-bold text-white">{adminSeoSummary.pageCount}</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-xs text-gray-500">Priority</p>
+                  <p class="mt-1 text-2xl font-bold text-amber-200">{adminSeoSummary.highPriorityCount}</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-xs text-gray-500">Articles</p>
+                  <p class="mt-1 text-2xl font-bold text-white">{adminSeoSummary.articleCount}</p>
+                </div>
+                <div class="rounded-md border border-white/10 bg-black/20 p-3">
+                  <p class="text-xs text-gray-500">Avg score</p>
+                  <p class="mt-1 text-2xl font-bold text-[#4DB6AC]">{adminSeoSummary.averageScore}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {seoActionLibrary.slice(0, 8).map((action) => (
+                <button type="button" class="group min-h-[120px] rounded-md border border-white/10 bg-[#0B0D10] p-4 text-left transition hover:border-[#4DB6AC]/70 hover:bg-[#111E20]">
+                  <span class="text-xs font-semibold text-gray-500">{action.category}</span>
+                  <span class="mt-3 block text-sm font-bold leading-5 text-white">{action.label}</span>
+                  <span class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#4DB6AC] group-hover:text-white">
+                    {action.oneClick}
+                    <svg aria-hidden="true" viewBox="0 0 20 20" class="h-3.5 w-3.5 fill-current"><path d="m12.3 4.3-1.4 1.4L14.2 9H3v2h11.2l-3.3 3.3 1.4 1.4L18 10l-5.7-5.7Z"/></svg>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-white/10 bg-[#11151A] p-5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-bold text-white">今日の優先ページ</h2>
+              <span class="rounded-full bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-200">Score低順</span>
+            </div>
+            <div class="mt-4 space-y-2">
+              {focusPages.map(({ page, index }) => (
+                <button type="button" data-page-index={index} class="page-pick flex w-full items-center justify-between gap-3 rounded-md border border-white/10 bg-black/20 px-3 py-3 text-left transition hover:border-[#4DB6AC]/70">
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-semibold text-white">{page.title}</span>
+                    <span class="block truncate text-xs text-gray-500">{page.primaryKeyword}</span>
+                  </span>
+                  <span class={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${page.score >= 88 ? 'bg-[#4DB6AC]/15 text-[#4DB6AC]' : page.score >= 76 ? 'bg-amber-400/10 text-amber-200' : 'bg-rose-500/10 text-rose-200'}`}>{page.score}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="section-1" class="mt-6 grid gap-5 xl:grid-cols-[420px_minmax(0,1fr)]">
+          <div class="rounded-lg border border-white/10 bg-[#11151A]">
+            <div class="border-b border-white/10 p-4">
+              <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500" for="page-search">Pages</label>
+              <div class="mt-3 flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4 fill-gray-500"><path d="M8.5 3a5.5 5.5 0 1 0 3.3 9.9l3.6 3.6 1.4-1.4-3.6-3.6A5.5 5.5 0 0 0 8.5 3Zm0 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>
+                <input id="page-search" data-page-search class="h-10 w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-600" placeholder="KW、URL、タイトルで検索" />
+              </div>
+            </div>
+            <div class="max-h-[760px] overflow-y-auto p-2" data-page-list>
+              {adminSeoPages.map((page, index) => (
+                <button type="button" data-page-row data-page-index={index} data-search={`${page.title} ${page.path} ${page.primaryKeyword}`} class="page-row flex w-full gap-3 rounded-md px-3 py-3 text-left transition hover:bg-white/5">
+                  <span class={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${page.score >= 88 ? 'bg-[#4DB6AC]' : page.score >= 76 ? 'bg-amber-400' : 'bg-rose-400'}`}></span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-semibold text-white">{page.title}</span>
+                    <span class="mt-1 block truncate text-xs text-gray-500">{page.path}</span>
+                    <span class="mt-2 inline-flex rounded-full border border-white/10 px-2 py-1 text-[11px] font-medium text-gray-400">{page.primaryKeyword}</span>
+                  </span>
+                  <span class="text-sm font-bold text-gray-300">{page.score}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-white/10 bg-[#11151A]">
+            <div class="border-b border-white/10 p-5">
+              <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]" data-page-schema>Service</p>
+                  <h2 class="mt-2 truncate text-2xl font-extrabold text-white" data-page-title>Page title</h2>
+                  <p class="mt-2 truncate text-sm text-gray-500" data-page-path>/growth/</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="h-16 w-16 rounded-full border-4 border-[#4DB6AC]/30 p-1">
+                    <div class="flex h-full w-full items-center justify-center rounded-full bg-[#4DB6AC]/10 text-lg font-extrabold text-[#4DB6AC]" data-page-score>0</div>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Readiness</p>
+                    <p class="text-sm font-semibold text-gray-300" data-page-health>Needs review</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-0 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div class="border-b border-white/10 p-5 xl:border-b-0 xl:border-r">
+                <div class="grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="text-xs font-semibold text-gray-500">Target KW</span>
+                    <input data-field="primaryKeyword" class="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" />
+                  </label>
+                  <label class="block">
+                    <span class="text-xs font-semibold text-gray-500">URL</span>
+                    <input data-field="path" class="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-gray-300 outline-none focus:border-[#4DB6AC]" readonly />
+                  </label>
+                  <label class="block md:col-span-2">
+                    <span class="text-xs font-semibold text-gray-500">Title</span>
+                    <input data-field="title" class="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" />
+                  </label>
+                  <label class="block md:col-span-2">
+                    <span class="text-xs font-semibold text-gray-500">Description</span>
+                    <textarea data-field="description" rows="3" class="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/20 px-3 py-3 text-sm leading-6 text-white outline-none focus:border-[#4DB6AC]"></textarea>
+                  </label>
+                  <label class="block md:col-span-2">
+                    <span class="text-xs font-semibold text-gray-500">AIO/AEO conclusion block</span>
+                    <textarea data-field="lede" rows="4" class="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/20 px-3 py-3 text-sm leading-6 text-white outline-none focus:border-[#4DB6AC]"></textarea>
+                  </label>
+                </div>
+
+                <div class="mt-6 rounded-md border border-white/10 bg-[#0B0D10] p-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white">公開制御</h3>
+                    <span class="text-xs text-gray-500">noindex/canonical/sitemap</span>
+                  </div>
+                  <div class="mt-4 grid gap-3 md:grid-cols-3">
+                    <label class="block">
+                      <span class="text-xs text-gray-500">Index</span>
+                      <select data-index-status class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]">
+                        <option value="index">検索に出す</option>
+                        <option value="noindex">検索に出さない</option>
+                      </select>
+                    </label>
+                    <label class="block md:col-span-2">
+                      <span class="text-xs text-gray-500">Canonical</span>
+                      <input data-canonical class="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-[#4DB6AC]" />
+                    </label>
+                    <label class="flex items-center gap-3 rounded-md border border-white/10 bg-black/20 px-3 py-3 md:col-span-3">
+                      <input data-sitemap type="checkbox" checked class="h-4 w-4 accent-[#4DB6AC]" />
+                      <span class="text-sm text-gray-300">sitemap.xmlに掲載する</span>
+                    </label>
+                  </div>
+                  <p class="mt-4 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm text-gray-300" data-index-message>安全です。</p>
+                </div>
+              </div>
+
+              <aside class="p-5">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-sm font-bold text-white">改善カード</h3>
+                  <span class="text-xs text-gray-500" data-task-count>0件</span>
+                </div>
+                <div class="mt-4 space-y-3" data-task-list></div>
+
+                <div class="mt-6 rounded-md border border-white/10 bg-black/20 p-4">
+                  <h3 class="text-sm font-bold text-white">公開フロー</h3>
+                  <ol class="mt-4 space-y-3 text-sm text-gray-400">
+                    <li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4DB6AC]/15 text-xs font-bold text-[#4DB6AC]">1</span>下書きを保存</li>
+                    <li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4DB6AC]/15 text-xs font-bold text-[#4DB6AC]">2</span>差分を確認</li>
+                    <li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4DB6AC]/15 text-xs font-bold text-[#4DB6AC]">3</span>GitHub PRを作成</li>
+                    <li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4DB6AC]/15 text-xs font-bold text-[#4DB6AC]">4</span>Cloudflareで公開</li>
+                  </ol>
+                  <button type="button" data-submit-proposal class="mt-5 flex h-10 w-full items-center justify-center rounded-md bg-[#4DB6AC] text-sm font-bold text-white transition hover:bg-[#00897B]">
+                    PR作成リクエスト
+                  </button>
+                  <p class="mt-3 min-h-10 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-gray-400" data-submit-status>Cloudflare AccessまたはADMIN_TOKEN設定後にPR作成できます。</p>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-2" class="mt-6 grid gap-5 xl:grid-cols-3">
+          {[
+            ['低CTR改善', 'Titleとdescriptionを検索意図に合わせ、上部に短い回答を置く。', 'KW・THP / UX'],
+            ['AIO引用準備', '150-200字の結論、箇条書き、FAQ、構造化データを同時に確認する。', 'AIO'],
+            ['重複・未登録対策', 'canonical、noindex、301、sitemap掲載をページ単位で矛盾なく制御する。', 'ネガティブ要素'],
+          ].map(([title, body, source]) => (
+            <article class="rounded-lg border border-white/10 bg-[#11151A] p-5">
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">{source}</p>
+              <h2 class="mt-3 text-lg font-bold text-white">{title}</h2>
+              <p class="mt-3 text-sm leading-6 text-gray-400">{body}</p>
+            </article>
+          ))}
+        </section>
+
+        <section id="section-3" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Internal Links</p>
+              <h2 class="mt-2 text-xl font-bold text-white">トピッククラスター作業台</h2>
+            </div>
+            <span class="text-sm text-gray-500">ピラーへ評価を集め、枝葉は関連度でつなぐ</span>
+          </div>
+          <div class="mt-5 grid gap-4 md:grid-cols-4">
+            {['ピラーページを選ぶ', '枝葉ページを選ぶ', 'アンカーテキストを作る', 'PR差分へ反映'].map((step, index) => (
+              <div class="rounded-md border border-white/10 bg-black/20 p-4">
+                <p class="text-xs font-bold text-[#4DB6AC]">{String(index + 1).padStart(2, '0')}</p>
+                <p class="mt-3 text-sm font-semibold text-white">{step}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="section-4" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
+          <div class="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Schema</p>
+              <h2 class="mt-2 text-xl font-bold text-white">構造化データウィザード</h2>
+              <p class="mt-3 text-sm leading-6 text-gray-400">コードを書かずに、ページタイプに応じたJSON-LDの必須項目を埋める画面です。</p>
+            </div>
+            <div class="grid gap-3 md:grid-cols-3">
+              {['Article + FAQPage', 'Service + Breadcrumb', 'SoftwareApplication'].map((schema) => (
+                <button type="button" class="rounded-md border border-white/10 bg-black/20 px-4 py-5 text-left text-sm font-semibold text-gray-200 transition hover:border-[#4DB6AC]/70 hover:text-white">{schema}</button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="section-5" class="mt-6 rounded-lg border border-white/10 bg-[#11151A] p-5">
+          <p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Indexing</p>
+          <h2 class="mt-2 text-xl font-bold text-white">検索に出す/出さないを安全に決める</h2>
+          <div class="mt-5 grid gap-4 md:grid-cols-3">
+            {[
+              ['検索に出す', 'index, follow / sitemap掲載 / self canonical'],
+              ['検索に出さない', 'noindex / sitemap除外 / canonicalなし'],
+              ['評価を寄せる', '301またはcanonical / noindex併用は警告'],
+            ].map(([title, body]) => (
+              <div class="rounded-md border border-white/10 bg-black/20 p-4">
+                <h3 class="text-sm font-bold text-white">{title}</h3>
+                <p class="mt-2 text-sm text-gray-400">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const dataElement = document.getElementById('admin-seo-data');
+    const pages = JSON.parse(dataElement?.textContent || '[]');
+    let selectedPage = pages[0];
+    const draft = new Map();
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    const healthLabel = (score) => {
+      if (score >= 88) return '公開品質に近い';
+      if (score >= 76) return '専門家レビュー推奨';
+      return '優先改善が必要';
+    };
+
+    const actionDraft = (page, actionId) => {
+      const kw = page.primaryKeyword;
+      const title = page.h1;
+      const related = page.related?.map((item) => `${item.label}: ${item.href}`).join('\n') || '関連ページ候補なし';
+      const drafts = {
+        'title-intent': `Title候補\n1. ${kw}とは？SEO/AEOで成果につなげる実践方法\n2. ${kw}の進め方｜優先順位、実装、効果検証まで\n3. ${title}｜検索意図に沿って改善するポイント`,
+        'description-ctr': `Description候補\n${kw}で成果を出すために、検索意図、AIO引用、内部リンク、構造化データまで一貫して整える方法を解説します。`,
+        'snippet-answer': `強調スニペット候補\n${kw}では、検索意図に合う結論をページ上部に置き、Title、description、本文、FAQを同じ主張で揃えることが重要です。`,
+        'aio-summary': `AIO/AEO結論ブロック\n結論、${kw}で重要なのは、AIが引用しやすい短い回答、根拠、FAQ、構造化データを同じページ内に揃えることです。mozule growthでは、この作業をページ単位で確認し、必要な差分だけをPRとして反映します。`,
+        'faq-aeo': `FAQ候補\nQ. ${kw}で最初に直すべき箇所は？\nA. Title、description、ページ冒頭の結論、FAQ、内部リンクを順に確認します。\n\nQ. AIO対策とSEO対策は別ですか？\nA. 別物ではありません。検索意図、E-E-A-T、構造化データ、内部リンクの精度を高める点で重なります。`,
+        'author-proof': `E-E-A-T追加ブロック\n監修: 高取將來 / Mozule growth\n確認日: ${new Date().toISOString().slice(0, 10)}\n根拠: Search Console、公開ページ、公式ドキュメント、一次情報を確認して更新。`,
+        freshness: `更新メモ\n最終更新日: ${new Date().toISOString().slice(0, 10)}\n更新理由: 検索意図、AIO引用性、内部リンク、構造化データの観点で本文とメタ情報を見直し。`,
+        'context-links': `内部リンク候補\n${related}\n\n推奨アンカー: 「${kw}の改善手順」「${kw}の優先順位」「${kw}を実装へつなぐ方法」`,
+        'three-click': `3クリック導線\n1. /growth/ から該当カテゴリへ\n2. カテゴリ/比較/learn一覧からこのページへ\n3. このページから関連ページへ文脈リンク`,
+        'article-schema': `JSON-LD方針\nArticle、FAQPage、BreadcrumbListを出力。著者、発行元、headline、description、mainEntityOfPageを必須確認。`,
+        'service-schema': `JSON-LD方針\n${page.schemaType}、FAQPage、BreadcrumbList、Organizationを出力。ページ本文にない情報はschemaへ入れない。`,
+        'index-safety': `Index安全チェック\n- index対象: sitemap掲載あり、self canonical\n- noindex対象: sitemap除外、canonicalなし\n- 301対象: 旧URLから正規URLへ転送`,
+        'ux-intent': `検索意図チェック\nKW: ${kw}\nTitle、description、H1、冒頭結論、CTAが同じニーズを向いているか確認。本文に関連度の低い論点を盛りすぎない。`,
+      };
+      return drafts[actionId] || '改善案を生成しました。';
+    };
+
+    const validateIndexing = () => {
+      const status = $('[data-index-status]')?.value || 'index';
+      const canonical = $('[data-canonical]')?.value.trim() || '';
+      const sitemap = $('[data-sitemap]')?.checked;
+      const message = $('[data-index-message]');
+      if (!message) return;
+
+      if (status === 'noindex' && sitemap) {
+        message.textContent = '警告: noindexページはsitemapから除外してください。';
+        message.className = 'mt-4 rounded-md border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100';
+        return;
+      }
+      if (status === 'noindex' && canonical) {
+        message.textContent = '警告: noindexとcanonicalの併用は避け、どちらかに絞ってください。';
+        message.className = 'mt-4 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-100';
+        return;
+      }
+      if (status === 'index' && !sitemap) {
+        message.textContent = '確認: index対象ならsitemap掲載を推奨します。';
+        message.className = 'mt-4 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-100';
+        return;
+      }
+      message.textContent = '安全です。公開前にPR差分で再確認します。';
+      message.className = 'mt-4 rounded-md border border-[#4DB6AC]/30 bg-[#4DB6AC]/10 px-3 py-2 text-sm text-[#B2DFDB]';
+    };
+
+    const renderTasks = (page) => {
+      const taskList = $('[data-task-list]');
+      const taskCount = $('[data-task-count]');
+      if (!taskList) return;
+      taskList.innerHTML = '';
+      taskCount.textContent = `${page.tasks.length}件`;
+      page.tasks.forEach((task) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.actionId = task.id;
+        button.className = 'group w-full rounded-md border border-white/10 bg-black/20 p-3 text-left transition hover:border-[#4DB6AC]/70 hover:bg-[#111E20]';
+        button.innerHTML = `
+          <span class="flex items-center justify-between gap-3">
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">${task.category}</span>
+            <span class="rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-gray-400">${task.impact}</span>
+          </span>
+          <span class="mt-2 block text-sm font-bold leading-5 text-white">${task.label}</span>
+          <span class="mt-2 block text-xs text-[#4DB6AC]">${task.oneClick}</span>
+        `;
+        button.addEventListener('click', () => {
+          const text = actionDraft(page, task.id);
+          draft.set(task.id, text);
+          $('[data-draft-output]')?.remove();
+          const output = document.createElement('div');
+          output.dataset.draftOutput = 'true';
+          output.className = 'mt-5 rounded-md border border-[#4DB6AC]/30 bg-[#4DB6AC]/10 p-4';
+          output.innerHTML = `<p class="text-xs font-semibold uppercase tracking-widest text-[#4DB6AC]">Draft</p><pre class="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100"></pre>`;
+          output.querySelector('pre').textContent = text;
+          taskList.after(output);
+        });
+        taskList.append(button);
+      });
+    };
+
+    const renderPage = (page) => {
+      selectedPage = page;
+      $('[data-page-title]').textContent = page.title;
+      $('[data-page-path]').textContent = page.path;
+      $('[data-page-score]').textContent = page.score;
+      $('[data-page-health]').textContent = healthLabel(page.score);
+      $('[data-page-schema]').textContent = page.schemaType;
+      $$('[data-field]').forEach((input) => {
+        input.value = page[input.dataset.field] || '';
+      });
+      $('[data-canonical]').value = page.path;
+      $('[data-index-status]').value = 'index';
+      $('[data-sitemap]').checked = true;
+      renderTasks(page);
+      validateIndexing();
+    };
+
+    $$('[data-page-row], .page-pick').forEach((row) => {
+      row.addEventListener('click', () => {
+        const index = Number(row.dataset.pageIndex);
+        if (!Number.isNaN(index) && pages[index]) renderPage(pages[index]);
+      });
+    });
+
+    $('[data-page-search]')?.addEventListener('input', (event) => {
+      const query = event.target.value.toLowerCase();
+      $$('[data-page-row]').forEach((row) => {
+        row.hidden = !row.dataset.search.toLowerCase().includes(query);
+      });
+    });
+
+    $$('[data-index-status], [data-canonical], [data-sitemap]').forEach((control) => {
+      control.addEventListener('input', validateIndexing);
+      control.addEventListener('change', validateIndexing);
+    });
+
+    $('[data-copy-plan]')?.addEventListener('click', async () => {
+      const changes = [...draft.values()].join('\n\n---\n\n') || 'まだ改善案は生成されていません。';
+      await navigator.clipboard?.writeText(changes);
+    });
+
+    $('[data-submit-proposal]')?.addEventListener('click', async () => {
+      const status = $('[data-submit-status]');
+      const button = $('[data-submit-proposal]');
+      const payload = {
+        path: $('[data-field="path"]')?.value || selectedPage.path,
+        title: $('[data-field="title"]')?.value || selectedPage.title,
+        description: $('[data-field="description"]')?.value || selectedPage.description,
+        primaryKeyword: $('[data-field="primaryKeyword"]')?.value || selectedPage.primaryKeyword,
+        lede: $('[data-field="lede"]')?.value || selectedPage.lede,
+        indexStatus: $('[data-index-status]')?.value || 'index',
+        canonical: $('[data-canonical]')?.value || '',
+        sitemap: Boolean($('[data-sitemap]')?.checked),
+        notes: [...draft.values()].join('\n\n---\n\n'),
+      };
+
+      status.textContent = 'PR作成リクエストを送信しています...';
+      status.className = 'mt-3 min-h-10 rounded-md border border-[#4DB6AC]/30 bg-[#4DB6AC]/10 px-3 py-2 text-xs leading-5 text-[#B2DFDB]';
+      button.disabled = true;
+
+      try {
+        const response = await fetch('/api/admin/proposals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.ok) {
+          throw new Error(result.message || 'PR作成に失敗しました。');
+        }
+
+        if (result.prUrl) {
+          status.innerHTML = `<a class="font-semibold text-[#4DB6AC] underline" href="${result.prUrl}" target="_blank" rel="noreferrer">GitHub PRを開く</a>`;
+        } else {
+          status.textContent = result.message || 'dry-runとして差分案を生成しました。GITHUB_TOKEN設定後にPR化できます。';
+        }
+      } catch (error) {
+        status.textContent = error.message || 'PR作成リクエストに失敗しました。';
+        status.className = 'mt-3 min-h-10 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs leading-5 text-amber-100';
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    renderPage(pages[0]);
+  </script>
+</AdminLayout>

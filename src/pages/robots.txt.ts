@@ -9,6 +9,7 @@ export async function GET() {
     'Disallow: /tags/',
     'Disallow: /demo/thanks/',
     'Disallow: /thanks/',
+    'Disallow: /admin/',
     'Disallow: /test/',
     'Disallow: /tests/',
     'Disallow: /growth/preview/',

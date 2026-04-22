@@ -3,6 +3,11 @@ main = "src/worker.js"
 compatibility_date = "2024-04-03"
 workers_dev = false
 
+[vars]
+ADMIN_ALLOWED_EMAILS = "masaki.takatori@mozule.co.jp"
+GITHUB_REPO = "masakitakatori-max/mozule-site"
+GITHUB_BASE_BRANCH = "master"
+
 [[routes]]
 pattern = "mozule.co.jp/*"
 zone_name = "mozule.co.jp"
