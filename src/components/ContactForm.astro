@@ -7,6 +7,7 @@ interface Props {
 const { context = 'general', submitLabel = 'フォームを送信する' } = Astro.props;
 const inputClass =
   'w-full rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-[#4DB6AC]';
+const fallbackContactEmail = 'org-owner@mozule.co.jp';
 ---
 <form
   class="contact-form text-left"
@@ -68,11 +69,45 @@ const inputClass =
     >
       {submitLabel}
     </button>
-    <p class="text-sm text-gray-500" data-contact-status aria-live="polite"></p>
+    <div class="flex flex-col gap-2">
+      <p class="text-sm text-gray-500" data-contact-status aria-live="polite"></p>
+      <a
+        href={`mailto:${fallbackContactEmail}`}
+        class="hidden text-sm font-medium text-[#4DB6AC] underline underline-offset-4 hover:text-white"
+        data-contact-fallback
+      >
+        メールアプリで直接送る
+      </a>
+    </div>
   </div>
 </form>
 
 <script>
+  const fallbackContactEmail = 'org-owner@mozule.co.jp';
+  const buildFallbackMailto = (form) => {
+    const formData = new FormData(form);
+    const context = String(formData.get('context') || 'general');
+    const topic = String(formData.get('topic') || 'Inquiry');
+    const name = String(formData.get('name') || '');
+    const company = String(formData.get('company') || '');
+    const email = String(formData.get('email') || '');
+    const targetUrl = String(formData.get('targetUrl') || '');
+    const message = String(formData.get('message') || '');
+    const subject = `[Mozule] ${topic} inquiry from ${name || 'Website visitor'}`;
+    const body = [
+      `Context: ${context}`,
+      `Name: ${name}`,
+      `Company: ${company || '-'}`,
+      `Email: ${email}`,
+      `Topic: ${topic}`,
+      `Target URL: ${targetUrl || '-'}`,
+      '',
+      message,
+    ].join('\n');
+
+    return `mailto:${fallbackContactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   document.querySelectorAll('[data-contact-form]').forEach((form) => {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -82,15 +117,29 @@ const inputClass =
 
       const status = target.querySelector('[data-contact-status]');
       const button = target.querySelector('button[type="submit"]');
+      const fallbackLink = target.querySelector('[data-contact-fallback]');
       const setStatus = (message, isError = false) => {
         if (!status) return;
         status.textContent = message;
         status.classList.toggle('text-red-300', isError);
         status.classList.toggle('text-gray-500', !isError);
       };
+      const revealFallback = () => {
+        if (!(fallbackLink instanceof HTMLAnchorElement)) return;
+        fallbackLink.href = buildFallbackMailto(target);
+        fallbackLink.classList.remove('hidden');
+      };
+      const launchFallback = () => {
+        const href = buildFallbackMailto(target);
+        revealFallback();
+        window.location.href = href;
+      };
 
       if (button instanceof HTMLButtonElement) button.disabled = true;
       setStatus('送信中です。');
+      if (fallbackLink instanceof HTMLAnchorElement) {
+        fallbackLink.classList.add('hidden');
+      }
 
       try {
         const formData = new FormData(target);
@@ -108,12 +157,21 @@ const inputClass =
         const result = await response.json().catch(() => ({}));
 
         if (!response.ok) {
+          if (response.status === 404 || response.status >= 500) {
+            launchFallback();
+            throw new Error('フォーム送信を利用できません。下のリンクから直接メールしてください。');
+          }
           throw new Error(result.message || '送信できませんでした。');
         }
 
         target.reset();
         setStatus('送信しました。確認後にご連絡します。');
       } catch (error) {
+        if (error instanceof TypeError) {
+          launchFallback();
+        } else {
+          revealFallback();
+        }
         setStatus(error instanceof Error ? error.message : '送信できませんでした。', true);
       } finally {
         if (button instanceof HTMLButtonElement) button.disabled = false;

@@ -1,3 +1,5 @@
+import { EmailMessage } from 'cloudflare:email';
+
 const MAX_LENGTHS = {
   name: 120,
   company: 160,
@@ -69,6 +71,10 @@ const submissionText = (submission) =>
   ].join('\n');
 
 const CONTACT_TO = 'masaki.takatori@mozule.co.jp';
+const DEFAULT_CLOUDFLARE_FROM_EMAIL = 'noreply@mozule.co.jp';
+const DEFAULT_CLOUDFLARE_FROM_NAME = 'Mozule Contact';
+const DEFAULT_CONTACT_FROM_EMAIL = 'noreply@mozule.co.jp';
+const DEFAULT_CONTACT_FROM_NAME = 'Mozule Site';
 const ADMIN_CONTENT_PATH = 'src/data/growthOverrides.json';
 const DEFAULT_GITHUB_REPO = 'masakitakatori-max/mozule-site';
 const ADMIN_MAX_LENGTHS = {
@@ -88,66 +94,134 @@ const ADMIN_MAX_LENGTHS = {
   imageCaption: 220,
 };
 
-const notifyCloudflareEmail = async (submission, env) => {
-  if (!env.CONTACT_EMAIL) return false;
+const getContactSender = (env) => {
+  const legacyFrom = String(env.CONTACT_FROM || '').trim();
+  const legacyMatch = legacyFrom.match(/^(.*)<([^<>]+)>$/);
+  const legacyName = legacyMatch ? normalize(legacyMatch[1], MAX_LENGTHS.name) : '';
+  const legacyEmail = legacyMatch ? normalize(legacyMatch[2], MAX_LENGTHS.email) : normalize(legacyFrom, MAX_LENGTHS.email);
 
-  await env.CONTACT_EMAIL.send({
-    to: CONTACT_TO,
-    from: { email: 'noreply@mozule.co.jp', name: 'Mozule Contact' },
-    replyTo: submission.email,
-    subject: `[Mozule] ${submission.topic} inquiry from ${submission.name}`,
-    text: submissionText(submission),
+  const email = normalize(env.CONTACT_FROM_EMAIL || legacyEmail, MAX_LENGTHS.email) || DEFAULT_CONTACT_FROM_EMAIL;
+  const name = normalize(env.CONTACT_FROM_NAME || legacyName, MAX_LENGTHS.name) || DEFAULT_CONTACT_FROM_NAME;
+
+  return {
+    email,
+    name,
+    header: `${name} <${email}>`,
+  };
+};
+
+const sanitizeHeader = (value) => String(value || '').replace(/[\r\n]/g, ' ').trim();
+
+const encodeSubject = (subject) => {
+  const bytes = new TextEncoder().encode(subject);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
   });
-  return true;
+  return `=?UTF-8?B?${btoa(binary)}?=`;
+};
+
+const createMessageId = () => `<${Date.now()}.${crypto.randomUUID()}@mozule.co.jp>`;
+
+const createEmailBody = (submission) => {
+  const text = submissionText(submission);
+  return [
+    'MIME-Version: 1.0',
+    `Date: ${new Date().toUTCString()}`,
+    `Message-ID: ${createMessageId()}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    `From: ${DEFAULT_CLOUDFLARE_FROM_NAME} <${DEFAULT_CLOUDFLARE_FROM_EMAIL}>`,
+    `To: ${CONTACT_TO}`,
+    `Reply-To: ${sanitizeHeader(submission.email)}`,
+    `Subject: ${encodeSubject(`[Mozule] ${submission.topic} inquiry from ${submission.name}`)}`,
+    '',
+    text,
+  ].join('\r\n');
+};
+
+const wrapNotificationError = (channel, error) => {
+  const code = error && typeof error === 'object' && 'code' in error ? error.code : '';
+  const message =
+    error && typeof error === 'object' && 'message' in error && error.message
+      ? error.message
+      : String(error || 'unknown error');
+  const wrapped = new Error(`${channel}${code ? ` (${code})` : ''}: ${message}`);
+  if (code) wrapped.code = code;
+  return wrapped;
+};
+
+const notifyCloudflareEmail = async (submission, env) => {
+  if (!env.CONTACT_EMAIL || env.RESEND_API_KEY) return false;
+
+  try {
+    const message = new EmailMessage(
+      DEFAULT_CLOUDFLARE_FROM_EMAIL,
+      CONTACT_TO,
+      createEmailBody(submission)
+    );
+    await env.CONTACT_EMAIL.send(message);
+    return true;
+  } catch (error) {
+    throw wrapNotificationError('cloudflare-email', error);
+  }
 };
 
 const notifyWebhook = async (submission, env) => {
   if (!env.CONTACT_WEBHOOK_URL) return false;
 
-  const response = await fetch(env.CONTACT_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      source: 'mozule.co.jp',
-      submittedAt: new Date().toISOString(),
-      ...submission,
-    }),
-  });
+  try {
+    const response = await fetch(env.CONTACT_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'mozule.co.jp',
+        submittedAt: new Date().toISOString(),
+        ...submission,
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Webhook failed: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Webhook failed: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    throw wrapNotificationError('webhook', error);
   }
-
-  return true;
 };
 
 const notifyResend = async (submission, env) => {
   if (!env.RESEND_API_KEY || !env.CONTACT_TO) return false;
 
-  const from = env.CONTACT_FROM || 'Mozule Site <noreply@mozule.co.jp>';
+  const sender = getContactSender(env);
   const subject = `[Mozule] ${submission.topic} inquiry from ${submission.name}`;
   const text = submissionText(submission);
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [env.CONTACT_TO],
-      reply_to: submission.email,
-      subject,
-      text,
-    }),
-  });
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: sender.header,
+        to: [env.CONTACT_TO],
+        reply_to: submission.email,
+        subject,
+        text,
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Resend failed: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Resend failed: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    throw wrapNotificationError('resend', error);
   }
-
-  return true;
 };
 
 const adminNormalize = (value, limit) => String(value || '').trim().slice(0, limit);

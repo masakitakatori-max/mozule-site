@@ -5,6 +5,8 @@ workers_dev = false
 
 [vars]
 ADMIN_ALLOWED_EMAILS = "masaki.takatori@mozule.co.jp"
+CONTACT_FROM_EMAIL = "noreply@mozule.co.jp"
+CONTACT_TO = "masaki.takatori@mozule.co.jp"
 GITHUB_REPO = "masakitakatori-max/mozule-site"
 GITHUB_BASE_BRANCH = "master"
 
@@ -14,7 +16,8 @@ zone_name = "mozule.co.jp"
 
 [[send_email]]
 name = "CONTACT_EMAIL"
-destination_address = "masaki.takatori@mozule.co.jp"
+allowed_destination_addresses = ["masaki.takatori@mozule.co.jp"]
+allowed_sender_addresses = ["noreply@mozule.co.jp"]
 
 [assets]
 directory = "./dist"
